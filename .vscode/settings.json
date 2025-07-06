@@ -56,5 +56,11 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "rpg_combat_portabilidad.sln"
+    "dotnet.defaultSolution": "rpg_combat_portabilidad.sln",
+    "cSpell.words": [
+        "LINQ",
+        "Scriptable",
+        "WASD"
+    ],
+    "editor.formatOnSave": true
 }
