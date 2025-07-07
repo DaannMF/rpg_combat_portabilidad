@@ -1,218 +1,193 @@
-# RPG Combat System
+# Sistema de Combate RPG
 
-A turn-based RPG combat system built in Unity, featuring a 4x6 grid battlefield with 3 players and 2 enemies.
+## Descripción del Juego
 
-## Features
+Sistema de combate RPG por turnos desarrollado en Unity, que presenta un campo de batalla de grilla 4x6 con 3 jugadores únicos y 2 enemigos controlados por IA. El juego implementa combate táctico estratégico donde los jugadores deben posicionarse y usar sus habilidades únicas para derrotar a todos los enemigos mientras al menos un jugador sobrevive.
 
-- **Turn-based Combat**: Strategic turn-based gameplay with movement and action phases
-- **Character Classes**: Three unique player types and enemy AI
-- **Grid-based Movement**: 4x6 battlefield with tactical positioning
-- **Combat System**: Melee and ranged attacks with healing abilities
-- **ScriptableObject Architecture**: Configurable character stats
-- **Clean Architecture**: Implements SOLID principles and design patterns
+El sistema cuenta con tres clases de personajes distintas (Luchador, Sanador, Arquero), cada una con estadísticas, habilidades y rangos de ataque únicos. Los jugadores se turnan con los enemigos en un sistema de combate estratégico basado en turnos.
 
-## Character Types
+## Información del Proyecto
 
-### Player 1 - Fighter
+**Autor**: Daniel Fimiani  
+**Proyecto**: Segundo Parcial  
+**Materia**: Portabilidad y Optimización  
+**Institución**: Image Campus  
 
-- **Health**: 20 HP
-- **Speed**: 3 cells per turn
-- **Melee Attack**: 5 damage
-- **Ranged Attack**: None
-- **Healing**: 2 HP (self only)
+## Características Principales
 
-### Player 2 - Healer
+- **Combate por Turnos**: Mecánicas estratégicas de movimiento y acción
+- **Clases de Personajes**: Tres tipos únicos de jugadores con habilidades distintivas
+- **Movimiento Basado en Grilla**: Campo de batalla táctico 4x6
+- **Sistema de Combate**: Ataques cuerpo a cuerpo, a distancia y habilidades de sanación
+- **Arquitectura ScriptableObject**: Estadísticas de personajes configurables
+- **Arquitectura Limpia**: Implementa principios SOLID y patrones de diseño
 
-- **Health**: 15 HP
-- **Speed**: 2 cells per turn
-- **Melee Attack**: 2 damage
-- **Ranged Attack**: 2 damage (range 3)
-- **Healing**: 5 HP (self and others, range 2)
+## Controles
 
-### Player 3 - Ranger
+### Movimiento
 
-- **Health**: 15 HP
-- **Speed**: 4 cells per turn
-- **Melee Attack**: 1 damage
-- **Ranged Attack**: 3 damage (unlimited range)
-- **Healing**: 2 HP (self only)
+- **WASD** o **Flechas**: Mover una celda en la dirección correspondiente
 
-### Enemy
+### Acciones
 
-- **Health**: 10 HP
-- **Speed**: 1 cell per turn
-- **Melee Attack**: 3 damage
-- **Ranged Attack**: 1 damage (range 3)
-- **Healing**: None
+- **UI de Botones**: Interfaz visual con botones dinámicos para acciones disponibles
+- **Botón "Heal Self"**: Sanación propia (si es posible)
+- **Botón "End Turn"**: Terminar turno
+- **Enter**: Forzar fin de turno
 
-## Controls
+## Condiciones de Victoria/Derrota
 
-### Movement
+### Victoria
 
-- **WASD** or **Arrow Keys**: Move one cell in direction
-- **Space**: Skip movement phase
+- Todos los enemigos son derrotados
+- Exactamente 1 jugador sobrevive
 
-### Actions
+### Derrota
 
-- **1**: Attack nearest enemy
-- **2**: Heal self (if possible)
-- **3**: Heal nearest player (if possible)
-- **Space**: Skip action phase
-- **Enter**: Force end turn
+- Cualquier jugador muere mientras haya enemigos vivos
 
-## Setup Instructions
+## Tipos de Personajes
 
-### Requirements
+### Jugador 1 - Luchador
 
-- Unity 2021.3 or later
+- **Salud**: 20 HP
+- **Velocidad**: 3 celdas por turno
+- **Ataque Cuerpo a Cuerpo**: 5 de daño
+- **Ataque a Distancia**: Ninguno
+- **Sanación**: 2 HP (solo a sí mismo)
+
+### Jugador 2 - Sanador
+
+- **Salud**: 15 HP
+- **Velocidad**: 2 celdas por turno
+- **Ataque Cuerpo a Cuerpo**: 2 de daño
+- **Ataque a Distancia**: 2 de daño (rango 3)
+- **Sanación**: 5 HP (a sí mismo y otros, rango 2)
+
+### Jugador 3 - Arquero
+
+- **Salud**: 15 HP
+- **Velocidad**: 4 celdas por turno
+- **Ataque Cuerpo a Cuerpo**: 1 de daño
+- **Ataque a Distancia**: 3 de daño (rango ilimitado)
+- **Sanación**: 2 HP (solo a sí mismo)
+
+### Enemigo
+
+- **Salud**: 10 HP
+- **Velocidad**: 1 celda por turno
+- **Ataque Cuerpo a Cuerpo**: 3 de daño
+- **Ataque a Distancia**: 1 de daño (rango 3)
+- **Sanación**: Ninguna
+
+## Documentación de Sistemas
+
+El proyecto incluye documentación detallada sobre la implementación de sistemas y principios SOLID:
+
+### Documentación Principal
+
+- **[Arquitectura General](Assets/Scripts/Documentation/ArquitecturaGeneral.md)**: Visión general del sistema y implementación de principios SOLID
+- **[Sistema de Gestión de Estado](Assets/Scripts/Documentation/SistemaEstadoJuego.md)**: Gestión de estados del juego y limpieza de sistemas
+- **[Sistema de Interfaz de Usuario](Assets/Scripts/Documentation/SistemaInterfazUsuario.md)**: UI basada en grillas y sistema de acciones dinámicas
+
+### Documentación Técnica
+
+- **[Sistema de Posicionamiento](Assets/Scripts/Documentation/SistemaGrid.md)**: Sistema de grilla y posicionamiento de personajes
+- **[Sistema de Estadísticas](Assets/Scripts/Documentation/SistemaEstadisticas.md)**: Visualización de estadísticas de personajes en tiempo real
+
+## Instalación y Configuración
+
+### Requisitos
+
+- Unity 2021.3 o posterior
 - Universal Render Pipeline (URP)
 
-### Installation
+### Instrucciones de Instalación
 
-1. Clone this repository
-2. Open the project in Unity
-3. Open the main scene (`Assets/Scenes/SampleScene.unity`)
-4. Press Play to start the game
+1. Clonar este repositorio
+2. Abrir el proyecto en Unity
+3. Abrir la escena principal (`Assets/Scenes/SampleScene.unity`)
+4. Presionar Play para iniciar el juego
 
-### Scene Setup
+## Arquitectura del Proyecto
 
-1. Create an empty GameObject and add the `GameManager` script
-2. Create another empty GameObject and add the `GridSystem` script
-3. Create another empty GameObject and add the `TurnManager` script
-4. Create prefabs for Player and Enemy characters
-5. Assign the character sprites to the GameManager
-6. Set up the UI Canvas with the `GameUI` script
+### Sistemas Principales
 
-## Architecture
+- **GridSystem**: Gestiona el campo de batalla 4x6 y seguimiento de posiciones
+- **Character System**: Maneja comportamiento, estadísticas y acciones de personajes
+- **TurnManager**: Controla el flujo de juego por turnos
+- **GameManager**: Orquesta el estado general del juego
+- **UI System**: Muestra información del juego y maneja retroalimentación del usuario
 
-### Core Systems
-
-- **GridSystem**: Manages the 4x6 battlefield and position tracking
-- **Character System**: Handles character behavior, stats, and actions
-- **TurnManager**: Controls the turn-based gameplay flow
-- **GameManager**: Orchestrates the overall game state
-- **UI System**: Displays game information and handles user feedback
-
-### SOLID Principles
-
-- **Single Responsibility**: Each class has one specific purpose
-- **Open/Closed**: Easy to extend with new character types
-- **Liskov Substitution**: Player and Enemy are interchangeable as Characters
-- **Interface Segregation**: Classes only expose necessary methods
-- **Dependency Inversion**: High-level modules depend on abstractions
-
-### Design Patterns
-
-- **Observer Pattern**: Event-driven architecture for loose coupling
-- **Strategy Pattern**: Different character behavior implementations
-- **Factory Pattern**: Character stats creation and configuration
-- **Command Pattern**: Encapsulated character actions
-
-## Project Structure
+### Estructura del Proyecto
 
 ```bash
 Assets/
 ├── Scripts/
-│   ├── Characters/
-│   │   ├── Character.cs          # Abstract base class
-│   │   ├── Player.cs             # Player character implementation
-│   │   └── Enemy.cs              # Enemy AI implementation
-│   ├── Data/
-│   │   ├── BaseCharacterStats.cs        # ScriptableObject for stats
-│   │   ├── CharacterType.cs             # Character type enum
-│   │   └── CharacterStatsConfigurator.cs # Stats factory
-│   ├── Grid/
-│   │   ├── GridPosition.cs       # Grid position struct
-│   │   ├── GridSystem.cs         # Grid management system
-│   │   └── GridCell.cs           # Individual grid cell
-│   ├── Managers/
-│   │   ├── GameManager.cs        # Main game controller
-│   │   └── TurnManager.cs        # Turn-based system
-│   ├── UI/
-│   │   └── GameUI.cs             # User interface controller
-│   └── Documentation/
-│       └── DesignDocument.md     # Detailed design documentation
-├── Art/
-│   └── Sprites/                  # Character and UI sprites
-└── Scenes/
-    └── SampleScene.unity         # Main game scene
+│   ├── Characters/          # Clases de personajes
+│   ├── Configuration/       # Configuradores de estadísticas
+│   ├── Controllers/         # Controladores de acciones
+│   ├── Data/               # Scriptable Objects
+│   ├── Enums/              # Enumeraciones del sistema
+│   ├── Grid/               # Sistema de grilla
+│   ├── Interfaces/         # Interfaces del sistema
+│   ├── Managers/           # Gestores principales
+│   ├── Models/             # Modelos de datos
+│   ├── Systems/            # Sistemas de lógica
+│   ├── UI/                 # Interfaz de usuario
+│   └── Documentation/      # Documentación técnica
+├── Prefabs/                # Prefabs del juego
+├── Art/Sprites/           # Sprites de personajes y UI
+└── Scenes/                # Escenas del juego
 ```
 
-## Game Rules
+## Principios SOLID Implementados
 
-### Victory Conditions
+- **Responsabilidad Única**: Cada clase tiene un propósito específico
+- **Abierto/Cerrado**: Fácil de extender con nuevos tipos de personajes
+- **Sustitución de Liskov**: Player y Enemy son intercambiables como Characters
+- **Segregación de Interfaces**: Las clases solo exponen métodos necesarios
+- **Inversión de Dependencias**: Los módulos de alto nivel dependen de abstracciones
 
-- All enemies are defeated
-- At least one player survives
+## Patrones de Diseño Utilizados
 
-### Defeat Conditions
+- **Patrón Observer**: Arquitectura basada en eventos para bajo acoplamiento
+- **Patrón Strategy**: Diferentes implementaciones de comportamiento de personajes
+- **Patrón Factory**: Creación y configuración de estadísticas de personajes
+- **Patrón Command**: Acciones de personajes encapsuladas
 
-- All players are defeated
-- Any enemies remain alive
+## Futuras Mejoras
 
-### Combat Rules
+### Características Planeadas
 
-- **Melee Attack**: Must be adjacent (including diagonally)
-- **Ranged Attack**: Must be more than 1 cell away, within character's range
-- **Healing**: Can heal self or others within healing range
-- **Movement**: Can move up to character's speed in cells per turn
-- **Turn Order**: Players and enemies alternate turns
+- Animaciones y efectos visuales de personajes
+- Sistema de sonido con retroalimentación de audio
+- Funcionalidad de guardado/carga del juego
+- Múltiples niveles de dificultad
+- Editor de nivel para campos de batalla personalizados
 
-## Development Notes
+### Mejoras Técnicas
 
-### Best Practices Applied
+- Procesamiento de IA enemiga asíncrona
+- Búsqueda de ruta A* para movimiento complejo
+- Sistema de habilidad más sofisticado
+- Soporte de juego en red
 
-- **Clean Code**: Descriptive naming, small methods, clear structure
-- **SOLID Principles**: Followed throughout the codebase
-- **Design Patterns**: Used appropriately for maintainability
-- **Error Handling**: Defensive programming with null checks
-- **Performance**: Efficient algorithms and data structures
+## Contribuciones
 
-### Optimization Considerations
+1. Forkear este repositorio
+2. Crear una rama de característica (`git checkout -b feature/amazing-feature`)
+3. Confirmar cambios (`git commit -m 'Add some amazing feature'`)
+4. Enviar a la rama (`git push origin feature/amazing-feature`)
+5. Abrir una Solicitud de Extracción
 
-- Dictionary-based grid lookups for O(1) performance
-- Event-driven UI updates to minimize processing
-- Struct usage for value types (GridPosition)
-- ScriptableObject sharing for memory efficiency
+## Licencia
 
-### Testing Strategy
+Este proyecto está licenciado bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
 
-- Unit tests for character stats and grid validation
-- Integration tests for turn management and game state
-- Performance testing for large grids and long sessions
+## Agradecimientos
 
-## Future Enhancements
-
-### Planned Features
-
-- Character animations and visual effects
-- Sound system with audio feedback
-- Save/Load game functionality
-- Multiple difficulty levels
-- Level editor for custom battlefields
-
-### Technical Improvements
-
-- Asynchronous enemy AI processing
-- A* pathfinding for complex movement
-- More sophisticated ability system
-- Network multiplayer support
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- Built using Unity Engine
-- Follows Unity best practices and conventions
-- Implements clean architecture principles
-- Designed for educational and portfolio purposes
+- Construido usando Unity Engine
+- Sigue las mejores prácticas y convenciones de Unity
+- Implementa principios de arquitectura limpia
+- Diseñado para fines educativos y de portafolio
