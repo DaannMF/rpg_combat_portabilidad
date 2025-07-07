@@ -104,6 +104,12 @@ public abstract class Character : MonoBehaviour {
 
     protected virtual void Die() {
         isDead = true;
+
+        SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer != null) {
+            spriteRenderer.enabled = false;
+        }
+
         OnCharacterDeath?.Invoke(this);
     }
 

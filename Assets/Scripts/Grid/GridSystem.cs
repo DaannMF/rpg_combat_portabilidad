@@ -85,6 +85,13 @@ public class GridSystem : MonoBehaviour {
         characterPositions[cell] = character;
     }
 
+    public void RemoveCharacterFromGrid(Character character) {
+        if (characterPositions.ContainsValue(character)) {
+            GridCell oldCell = characterPositions.FirstOrDefault(x => x.Value == character).Key;
+            characterPositions.Remove(oldCell);
+        }
+    }
+
     public List<GridCell> GetValidMovePositions(GridCell fromCell, int maxDistance) {
         List<GridCell> validPositions = new List<GridCell>();
 

@@ -198,21 +198,28 @@ public class GameManager : MonoBehaviour {
     }
 
     private void OnPlayerDeath(Character player) {
-        bool anyPlayersAlive = players.Any(p => !p.IsDead);
-        bool anyEnemiesAlive = enemies.Any(e => !e.IsDead);
+        gridSystem.RemoveCharacterFromGrid(player);
 
-        if (!anyPlayersAlive && anyEnemiesAlive)
+        bool anyEnemiesAlive = enemies.Any(e => !e.IsDead);
+        if (anyEnemiesAlive) {
             GameOver(false);
+            return;
+        }
+
+        CheckGameOverConditions();
     }
 
     private void OnEnemyDeath(Character enemy) {
-        bool anyEnemiesAlive = enemies.Any(e => !e.IsDead);
+        gridSystem.RemoveCharacterFromGrid(enemy);
+        CheckGameOverConditions();
+    }
 
-        if (!anyEnemiesAlive) {
-            IEnumerable<Character> survivingPlayers = players.Where(p => !p.IsDead);
-            if (survivingPlayers.Count() == 1)
-                GameOver(true);
-        }
+    private void CheckGameOverConditions() {
+        bool anyEnemiesAlive = enemies.Any(e => !e.IsDead);
+        int playersAlive = players.Count(p => !p.IsDead);
+
+        if (!anyEnemiesAlive && playersAlive == 1)
+            GameOver(true);
     }
 
     private void GameOver(bool victory) {

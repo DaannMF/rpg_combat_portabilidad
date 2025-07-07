@@ -34,9 +34,10 @@ public class PlayerActionController {
         var availableActions = abilitySystem.GetAvailableActions(player, allCharacters);
 
         var validActions = new List<PlayerAction>();
-        foreach (var action in availableActions)
-            if (abilitySystem.CanPerformAction(player, action))
-                validActions.Add(action);
+        foreach (var action in availableActions) {
+            action.isAvailable = abilitySystem.CanPerformAction(player, action);
+            validActions.Add(action);
+        }
 
         OnActionsUpdated?.Invoke(validActions);
     }
@@ -48,6 +49,7 @@ public class PlayerActionController {
             OnActionExecuted?.Invoke(action);
 
             if (action.actionType == ActionType.EndTurn) {
+                player.EndTurn();
                 movementSystem.EndCharacterTurn(player);
                 OnMovementUpdated?.Invoke(0);
             }

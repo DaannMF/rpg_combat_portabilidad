@@ -95,8 +95,17 @@ public class PlayerActionUI : MonoBehaviour {
     }
 
     private void ExecuteAction(PlayerAction action) {
-        if (currentPlayer != null && actionController != null)
-            actionController.TryExecuteAction(currentPlayer, action);
+        if (currentPlayer == null) {
+            Debug.LogError("ExecuteAction called but currentPlayer is null!");
+            return;
+        }
+
+        if (actionController == null) {
+            Debug.LogError("ExecuteAction called but actionController is null!");
+            return;
+        }
+
+        actionController.TryExecuteAction(currentPlayer, action);
     }
 
     private void EndTurn() {
@@ -112,18 +121,27 @@ public class PlayerActionUI : MonoBehaviour {
     }
 
     private void OnActionExecuted(PlayerAction action) {
-        Debug.Log($"Action executed: {action.displayName}");
-
         if (action.actionType == ActionType.EndTurn)
             SetUIActive(false);
     }
 
     private void OnTurnStart(Character character) {
         UpdateCurrentPlayerText(character);
+
+        if (character != null && character.CharacterType.IsPlayer()) {
+            SetCurrentPlayer(character);
+        }
+        else {
+            currentPlayer = null;
+            SetUIActive(false);
+        }
     }
 
     private void OnTurnEnd(Character character) {
-        // Optional: handle turn end if needed
+        if (character != null && character.CharacterType.IsPlayer()) {
+            currentPlayer = null;
+            SetUIActive(false);
+        }
     }
 
     private void UpdateCurrentPlayerText(Character character) {
