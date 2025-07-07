@@ -17,9 +17,12 @@ public class GameManager : MonoBehaviour {
     [SerializeField] private Sprite rangeSprite;
     [SerializeField] private Sprite[] enemySprites;
 
+    [Header("UI References")]
+    [SerializeField] private PlayerActionUI playerActionUI;
+
     public event Action OnGameWon;
     public event Action OnGameLost;
-    public event Action<GameState> OnGameStateChanged;
+    public event Action OnCharactersSpawned;
 
     private List<Character> allCharacters = new List<Character>();
     private List<Character> players = new List<Character>();
@@ -29,6 +32,10 @@ public class GameManager : MonoBehaviour {
     private BaseCharacterStats player2Stats;
     private BaseCharacterStats player3Stats;
     private BaseCharacterStats enemyStats;
+
+    private PlayerActionController actionController;
+    private MovementSystem movementSystem;
+    private PlayerAbilitySystem abilitySystem;
 
 
     private void Start() {
@@ -52,16 +59,38 @@ public class GameManager : MonoBehaviour {
         if (turnManager == null)
             turnManager = GetComponentInChildren<TurnManager>();
 
+        InitializeSystems();
         CreateCharacterStats();
         SpawnCharacters();
+
+        OnCharactersSpawned?.Invoke();
+
         SetupTurnManager();
+        SetupUI();
         StartGame();
+    }
+
+    private void InitializeSystems() {
+        movementSystem = new MovementSystem(gridSystem);
+        abilitySystem = new PlayerAbilitySystem();
+        actionController = new PlayerActionController(abilitySystem, movementSystem);
+    }
+
+    private void SetupUI() {
+        if (playerActionUI != null && actionController != null)
+            playerActionUI.Initialize(actionController);
     }
 
     private void CreateCharacterStats() {
         player1Stats = CharacterStatsConfigurator.CreatePlayer1Stats();
+        player1Stats.characterSprite = fighterSprite;
+
         player2Stats = CharacterStatsConfigurator.CreatePlayer2Stats();
+        player2Stats.characterSprite = healerSprite;
+
         player3Stats = CharacterStatsConfigurator.CreatePlayer3Stats();
+        player3Stats.characterSprite = rangeSprite;
+
         enemyStats = CharacterStatsConfigurator.CreateEnemyStats();
     }
 
@@ -78,8 +107,8 @@ public class GameManager : MonoBehaviour {
         SpawnPlayer(CharacterType.Player1, spawnPositions[0], player1Stats, fighterSprite);
         SpawnPlayer(CharacterType.Player2, spawnPositions[1], player2Stats, healerSprite);
         SpawnPlayer(CharacterType.Player3, spawnPositions[2], player3Stats, rangeSprite);
-        SpawnEnemy(spawnPositions[3], enemyStats, GetEnemySprite(0));
-        SpawnEnemy(spawnPositions[4], enemyStats, GetEnemySprite(1));
+        SpawnEnemy(spawnPositions[3], CreateEnemyStats(1), GetEnemySprite(0));
+        SpawnEnemy(spawnPositions[4], CreateEnemyStats(2), GetEnemySprite(1));
     }
 
     private List<GridCell> GetRandomPositions(List<GridCell> availablePositions, int count) {
@@ -104,6 +133,17 @@ public class GameManager : MonoBehaviour {
         return enemySprites[enemyIndex % enemySprites.Length];
     }
 
+    private BaseCharacterStats CreateEnemyStats(int enemyIndex) {
+        BaseCharacterStats stats = CharacterStatsConfigurator.CreateEnemyStats();
+
+        if (stats != null) {
+            stats.characterName = $"Enemy {enemyIndex}";
+            stats.characterSprite = GetEnemySprite(enemyIndex - 1);
+        }
+
+        return stats;
+    }
+
     private void SpawnPlayer(CharacterType type, GridCell position, BaseCharacterStats stats, Sprite sprite) {
         Vector2 spritePositionWithOffset = gridSystem.GetWorldPosition(position) + new Vector2(0, 0.2f);
         GameObject playerObject = Instantiate(characterPrefab, spritePositionWithOffset, Quaternion.identity, transform);
@@ -112,6 +152,9 @@ public class GameManager : MonoBehaviour {
 
         SetupCharacter(player, type, position, stats, sprite);
         players.Add(player);
+
+        if (actionController != null)
+            player.SetActionController(actionController);
 
         player.OnCharacterDeath += OnPlayerDeath;
     }
@@ -142,6 +185,12 @@ public class GameManager : MonoBehaviour {
 
     private void SetupTurnManager() {
         turnManager.Initialize(allCharacters);
+
+        // Set action controller in turn manager
+        if (actionController != null) {
+            actionController.Initialize(allCharacters);
+            turnManager.SetActionController(actionController);
+        }
     }
 
     private void StartGame() {
@@ -171,8 +220,6 @@ public class GameManager : MonoBehaviour {
             OnGameWon?.Invoke();
         else
             OnGameLost?.Invoke();
-
-        OnGameStateChanged?.Invoke(victory ? GameState.Won : GameState.Lost);
     }
 
     public List<Character> GetAllPlayers() {

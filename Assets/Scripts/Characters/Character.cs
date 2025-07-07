@@ -55,7 +55,7 @@ public abstract class Character : MonoBehaviour {
     public virtual bool CanMoveTo(GridCell targetPosition) {
         if (hasMovedThisTurn || isDead) return false;
 
-        int distance = currentPosition.GetManhattanDistance(targetPosition);
+        int distance = currentPosition.GetChebyshevDistance(targetPosition);
         return distance <= stats.speed;
     }
 
@@ -70,34 +70,17 @@ public abstract class Character : MonoBehaviour {
     public virtual bool CanAttack(Character target) {
         if (hasActedThisTurn || isDead || target == null || target.IsDead) return false;
 
-        int distance = currentPosition.GetManhattanDistance(target.CurrentPosition);
+        int distance = currentPosition.GetChebyshevDistance(target.CurrentPosition);
         return stats.CanAttackAtDistance(distance);
     }
 
     public virtual void Attack(Character target) {
         if (!CanAttack(target)) return;
 
-        int distance = currentPosition.GetManhattanDistance(target.CurrentPosition);
+        int distance = currentPosition.GetChebyshevDistance(target.CurrentPosition);
         int damage = stats.GetAttackDamage(distance);
 
         target.TakeDamage(damage);
-        hasActedThisTurn = true;
-    }
-
-    public virtual bool CanHeal(Character target) {
-        if (hasActedThisTurn || isDead || target == null || target.IsDead) return false;
-        if (!stats.canHeal) return false;
-
-        bool isSelf = target == this;
-        int distance = isSelf ? 0 : currentPosition.GetManhattanDistance(target.CurrentPosition);
-
-        return stats.CanHealTarget(distance, isSelf);
-    }
-
-    public virtual void Heal(Character target) {
-        if (!CanHeal(target)) return;
-
-        target.RestoreHealth(stats.healingAmount);
         hasActedThisTurn = true;
     }
 

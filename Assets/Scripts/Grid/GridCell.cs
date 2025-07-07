@@ -34,10 +34,6 @@ public class GridCell : MonoBehaviour {
         }
     }
 
-    public Vector2 GetWorldPosition() {
-        return worldPosition;
-    }
-
     public bool Equals(GridCell other) {
         return x == other.x && y == other.y;
     }
@@ -46,7 +42,7 @@ public class GridCell : MonoBehaviour {
         return Mathf.Abs(x - other.x) + Mathf.Abs(y - other.y);
     }
 
-    public override string ToString() {
-        return $"GridCell({x}, {y})";
+    public int GetChebyshevDistance(GridCell other) {
+        return Mathf.Max(Mathf.Abs(x - other.x), Mathf.Abs(y - other.y));
     }
 }

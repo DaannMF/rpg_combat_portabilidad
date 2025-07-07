@@ -29,13 +29,11 @@ public class Enemy : Character {
             return;
         }
 
-        if (!hasMovedThisTurn) {
+        if (!hasMovedThisTurn)
             ExecuteRandomMove();
-        }
 
-        if (!hasActedThisTurn) {
+        if (!hasActedThisTurn)
             ExecuteAttackAction();
-        }
 
         isExecutingTurn = false;
         EndTurn();
@@ -47,14 +45,49 @@ public class Enemy : Character {
         List<GridCell> validMoves = gridSystem.GetValidMovePositions(currentPosition, stats.speed);
 
         if (validMoves.Count > 0) {
-            GridCell randomMove = validMoves[Random.Range(0, validMoves.Count)];
-            gridSystem.SetCharacterPosition(this, randomMove);
-            MoveTo(randomMove);
-            transform.position = gridSystem.GetWorldPosition(randomMove);
+            GridCell bestMove = FindBestMovePosition(validMoves);
+            if (bestMove != null) {
+                gridSystem.SetCharacterPosition(this, bestMove);
+                MoveTo(bestMove);
+                transform.position = gridSystem.GetWorldPosition(bestMove);
+            }
+            else {
+                hasMovedThisTurn = true;
+            }
         }
         else {
             hasMovedThisTurn = true;
         }
+    }
+
+    private GridCell FindBestMovePosition(List<GridCell> validMoves) {
+        if (gameManager == null) return validMoves[Random.Range(0, validMoves.Count)];
+
+        var players = gameManager.GetAllPlayers().Where(p => !p.IsDead).ToList();
+        if (players.Count == 0) return validMoves[Random.Range(0, validMoves.Count)];
+
+        GridCell bestMove = null;
+        int shortestDistance = int.MaxValue;
+
+        // Find the move that gets us closest to a player we can attack
+        foreach (var move in validMoves) {
+            foreach (var player in players) {
+                int distance = move.GetChebyshevDistance(player.CurrentPosition);
+
+                // Prefer moves that put us in attack range
+                if (distance == 1) {
+                    return move;
+                }
+
+                // Otherwise, find the move that gets us closest
+                if (distance < shortestDistance) {
+                    shortestDistance = distance;
+                    bestMove = move;
+                }
+            }
+        }
+
+        return bestMove ?? validMoves[Random.Range(0, validMoves.Count)];
     }
 
     private void ExecuteAttackAction() {
@@ -72,26 +105,34 @@ public class Enemy : Character {
         if (gameManager == null) return null;
 
         List<Character> alivePlayers = gameManager.GetAllPlayers().Where(p => !p.IsDead).ToList();
-
         if (alivePlayers.Count == 0) return null;
 
-        List<Character> nearestPlayers = new List<Character>();
-        int minDistance = int.MaxValue;
-
+        // First, try to find players in attack range
+        var attackableTargets = new List<Character>();
         foreach (var player in alivePlayers) {
-            int distance = currentPosition.GetManhattanDistance(player.CurrentPosition);
-
-            if (distance < minDistance) {
-                minDistance = distance;
-                nearestPlayers.Clear();
-                nearestPlayers.Add(player);
-            }
-            else if (distance == minDistance) {
-                nearestPlayers.Add(player);
+            if (CanAttack(player)) {
+                attackableTargets.Add(player);
             }
         }
 
-        return nearestPlayers.Count > 0 ? nearestPlayers[Random.Range(0, nearestPlayers.Count)] : null;
+        if (attackableTargets.Count > 0) {
+            // Prioritize targets by health (attack weakest first)
+            return attackableTargets.OrderBy(p => p.CurrentHealth).First();
+        }
+
+        // If no attackable targets, find nearest player
+        Character nearestPlayer = null;
+        int minDistance = int.MaxValue;
+
+        foreach (var player in alivePlayers) {
+            int distance = currentPosition.GetChebyshevDistance(player.CurrentPosition);
+            if (distance < minDistance) {
+                minDistance = distance;
+                nearestPlayer = player;
+            }
+        }
+
+        return nearestPlayer;
     }
 
     public override void EndTurn() {

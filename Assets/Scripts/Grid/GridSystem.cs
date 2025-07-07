@@ -43,13 +43,13 @@ public class GridSystem : MonoBehaviour {
         Camera mainCamera = Camera.main;
         if (mainCamera == null) {
             Debug.LogWarning("No main camera found. Using default origin (0, 0).");
-            gridOrigin = Vector3.zero;
+            gridOrigin = Vector2.zero;
             return;
         }
 
-        Vector3 bottomLeft = mainCamera.ScreenToWorldPoint(new Vector3(0, 0, mainCamera.nearClipPlane));
+        Vector2 bottomLeft = mainCamera.ScreenToWorldPoint(new Vector2(0, 0));
         float halfCellSize = cellSize * 0.5f + 0.2f;
-        gridOrigin = new Vector3(bottomLeft.x + halfCellSize, bottomLeft.y + halfCellSize, 0);
+        gridOrigin = new Vector2(bottomLeft.x + halfCellSize, bottomLeft.y + halfCellSize);
     }
 
     public Vector2 GetWorldPosition(int x, int y) {
@@ -95,7 +95,7 @@ public class GridSystem : MonoBehaviour {
                 GridCell targetCell = GetGridCell(x, y);
                 if (targetCell == null || targetCell.Equals(fromCell)) continue;
 
-                int distance = fromCell.GetManhattanDistance(targetCell);
+                int distance = fromCell.GetChebyshevDistance(targetCell);
                 if (distance <= maxDistance && !IsPositionOccupied(targetCell)) {
                     validPositions.Add(targetCell);
                 }

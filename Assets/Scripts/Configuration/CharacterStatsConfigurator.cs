@@ -1,10 +1,8 @@
 using UnityEngine;
 
 [System.Serializable]
-public static class CharacterStatsConfigurator
-{
-    public static BaseCharacterStats CreatePlayer1Stats()
-    {
+public static class CharacterStatsConfigurator {
+    public static BaseCharacterStats CreatePlayer1Stats() {
         var stats = ScriptableObject.CreateInstance<BaseCharacterStats>();
         stats.characterName = "Fighter";
         stats.maxHealth = 20;
@@ -19,9 +17,8 @@ public static class CharacterStatsConfigurator
         stats.maxHealingDistance = 0;
         return stats;
     }
-    
-    public static BaseCharacterStats CreatePlayer2Stats()
-    {
+
+    public static BaseCharacterStats CreatePlayer2Stats() {
         var stats = ScriptableObject.CreateInstance<BaseCharacterStats>();
         stats.characterName = "Healer";
         stats.maxHealth = 15;
@@ -36,9 +33,8 @@ public static class CharacterStatsConfigurator
         stats.maxHealingDistance = 2;
         return stats;
     }
-    
-    public static BaseCharacterStats CreatePlayer3Stats()
-    {
+
+    public static BaseCharacterStats CreatePlayer3Stats() {
         var stats = ScriptableObject.CreateInstance<BaseCharacterStats>();
         stats.characterName = "Ranger";
         stats.maxHealth = 15;
@@ -53,9 +49,8 @@ public static class CharacterStatsConfigurator
         stats.maxHealingDistance = 0;
         return stats;
     }
-    
-    public static BaseCharacterStats CreateEnemyStats()
-    {
+
+    public static BaseCharacterStats CreateEnemyStats() {
         var stats = ScriptableObject.CreateInstance<BaseCharacterStats>();
         stats.characterName = "Enemy";
         stats.maxHealth = 10;
@@ -70,4 +65,4 @@ public static class CharacterStatsConfigurator
         stats.maxHealingDistance = 0;
         return stats;
     }
-} 
+}
