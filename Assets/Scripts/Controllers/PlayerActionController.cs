@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
+using System.Linq;
 
 public class PlayerActionController {
     private IPlayerAbilitySystem abilitySystem;
@@ -8,6 +8,7 @@ public class PlayerActionController {
     private List<Character> allCharacters;
 
     public event Action<List<PlayerAction>> OnActionsUpdated;
+    public event Action<List<ActionGroup>> OnActionGroupsUpdated;
     public event Action<int> OnMovementUpdated;
     public event Action<PlayerAction> OnActionExecuted;
 
@@ -40,6 +41,31 @@ public class PlayerActionController {
         }
 
         OnActionsUpdated?.Invoke(validActions);
+
+        var groupedActions = GroupActionsByType(validActions);
+        OnActionGroupsUpdated?.Invoke(groupedActions);
+    }
+
+    private List<ActionGroup> GroupActionsByType(List<PlayerAction> actions) {
+        var groups = new Dictionary<ActionType, ActionGroup>();
+
+        foreach (var action in actions) {
+            if (action.actionType == ActionType.EndTurn) continue;
+
+            if (!groups.ContainsKey(action.actionType))
+                groups[action.actionType] = new ActionGroup(action.actionType);
+
+
+            if (action.isAvailable) {
+                if (action.actionType == ActionType.HealSelf)
+                    groups[action.actionType].isAvailable = true;
+
+                else if (action.target != null)
+                    groups[action.actionType].AddTarget(action.target);
+            }
+        }
+
+        return groups.Values.ToList();
     }
 
     public bool TryExecuteAction(Character player, PlayerAction action) {
@@ -63,6 +89,13 @@ public class PlayerActionController {
         }
 
         return false;
+    }
+
+    public bool TryExecuteActionOnTarget(Character player, ActionType actionType, Character target) {
+        if (!player.CharacterType.IsPlayer()) return false;
+
+        var action = new PlayerAction(actionType, target);
+        return TryExecuteAction(player, action);
     }
 
     public bool TryMovePlayer(Character player, GridCell targetPosition) {

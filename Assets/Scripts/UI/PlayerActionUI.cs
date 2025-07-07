@@ -5,13 +5,14 @@ using TMPro;
 
 public class PlayerActionUI : MonoBehaviour {
     [Header("UI References")]
-    [SerializeField] private GameObject actionButtonPrefab;
-    [SerializeField] private Transform actionButtonContainer;
+    [SerializeField] private GameObject actionGridPrefab;
+    [SerializeField] private Transform actionGridContainer;
     [SerializeField] private TMP_Text movementText;
     [SerializeField] private TMP_Text currentPlayerText;
     [SerializeField] private Button endTurnButton;
+    [SerializeField] private Button healSelfButton;
 
-    private List<Button> actionButtons = new List<Button>();
+    private List<ActionTargetGrid> actionGrids = new List<ActionTargetGrid>();
     private PlayerActionController actionController;
     private Character currentPlayer;
     private TurnManager turnManager;
@@ -19,6 +20,7 @@ public class PlayerActionUI : MonoBehaviour {
     private void OnDestroy() {
         if (actionController != null) {
             actionController.OnActionsUpdated -= UpdateActionButtons;
+            actionController.OnActionGroupsUpdated -= UpdateActionGrids;
             actionController.OnMovementUpdated -= UpdateMovementDisplay;
             actionController.OnActionExecuted -= OnActionExecuted;
         }
@@ -30,6 +32,9 @@ public class PlayerActionUI : MonoBehaviour {
 
         if (endTurnButton != null)
             endTurnButton.onClick.RemoveListener(EndTurn);
+
+        if (healSelfButton != null)
+            healSelfButton.onClick.RemoveListener(HealSelf);
     }
 
     public void Initialize(PlayerActionController controller) {
@@ -38,6 +43,7 @@ public class PlayerActionUI : MonoBehaviour {
 
         if (actionController != null) {
             actionController.OnActionsUpdated += UpdateActionButtons;
+            actionController.OnActionGroupsUpdated += UpdateActionGrids;
             actionController.OnMovementUpdated += UpdateMovementDisplay;
             actionController.OnActionExecuted += OnActionExecuted;
         }
@@ -47,9 +53,12 @@ public class PlayerActionUI : MonoBehaviour {
             turnManager.OnTurnEnd += OnTurnEnd;
         }
 
-        if (endTurnButton != null) {
+        if (endTurnButton != null)
             endTurnButton.onClick.AddListener(EndTurn);
-        }
+
+        if (healSelfButton != null)
+            healSelfButton.onClick.AddListener(HealSelf);
+
     }
 
     public void SetCurrentPlayer(Character player) {
@@ -63,55 +72,60 @@ public class PlayerActionUI : MonoBehaviour {
     }
 
     private void UpdateActionButtons(List<PlayerAction> availableActions) {
-        ClearActionButtons();
-
-        foreach (var action in availableActions) {
-            if (action.actionType == ActionType.EndTurn) continue;
-
-            CreateActionButton(action);
+        if (healSelfButton != null) {
+            var healSelfAction = availableActions.Find(a => a.actionType == ActionType.HealSelf);
+            healSelfButton.interactable = healSelfAction != null && healSelfAction.isAvailable;
         }
     }
 
-    private void CreateActionButton(PlayerAction action) {
-        if (actionButtonPrefab == null) return;
+    private void UpdateActionGrids(List<ActionGroup> actionGroups) {
+        ClearActionGrids();
 
-        GameObject buttonObj = Instantiate(actionButtonPrefab, actionButtonContainer);
+        foreach (var group in actionGroups) {
+            if (group.actionType == ActionType.HealSelf)
+                continue;
 
-        var actionButtonComponent = buttonObj.GetComponent<ActionButton>();
-        if (actionButtonComponent != null)
-            actionButtonComponent.Setup(action, ExecuteAction);
-
-        actionButtons.Add(actionButtonComponent.GetComponent<Button>());
+            CreateActionGrid(group);
+        }
     }
 
-    private void ClearActionButtons() {
-        foreach (var button in actionButtons)
-            if (button != null) {
-                button.onClick.RemoveAllListeners();
-                Destroy(button.gameObject);
-            }
+    private void CreateActionGrid(ActionGroup actionGroup) {
+        if (actionGridPrefab == null || actionGridContainer == null) return;
 
-        actionButtons.Clear();
+        GameObject gridObj = Instantiate(actionGridPrefab, actionGridContainer);
+        var actionGrid = gridObj.GetComponent<ActionTargetGrid>();
+
+        if (actionGrid != null) {
+            actionGrid.Setup(actionGroup.actionType, OnTargetSelected);
+            actionGrid.UpdateTargets(actionGroup.availableTargets);
+            actionGrids.Add(actionGrid);
+        }
     }
 
-    private void ExecuteAction(PlayerAction action) {
-        if (currentPlayer == null) {
-            Debug.LogError("ExecuteAction called but currentPlayer is null!");
-            return;
-        }
+    private void ClearActionGrids() {
+        foreach (var grid in actionGrids)
+            if (grid != null)
+                Destroy(grid.gameObject);
 
-        if (actionController == null) {
-            Debug.LogError("ExecuteAction called but actionController is null!");
-            return;
-        }
+        actionGrids.Clear();
+    }
 
-        actionController.TryExecuteAction(currentPlayer, action);
+    private void OnTargetSelected(ActionType actionType, Character target) {
+        if (currentPlayer == null || actionController == null) return;
+        actionController.TryExecuteActionOnTarget(currentPlayer, actionType, target);
     }
 
     private void EndTurn() {
         if (currentPlayer != null && actionController != null) {
             var endTurnAction = new PlayerAction(ActionType.EndTurn);
             actionController.TryExecuteAction(currentPlayer, endTurnAction);
+        }
+    }
+
+    private void HealSelf() {
+        if (currentPlayer != null && actionController != null) {
+            var healSelfAction = new PlayerAction(ActionType.HealSelf);
+            actionController.TryExecuteAction(currentPlayer, healSelfAction);
         }
     }
 
@@ -128,9 +142,8 @@ public class PlayerActionUI : MonoBehaviour {
     private void OnTurnStart(Character character) {
         UpdateCurrentPlayerText(character);
 
-        if (character != null && character.CharacterType.IsPlayer()) {
+        if (character != null && character.CharacterType.IsPlayer())
             SetCurrentPlayer(character);
-        }
         else {
             currentPlayer = null;
             SetUIActive(false);
@@ -145,13 +158,10 @@ public class PlayerActionUI : MonoBehaviour {
     }
 
     private void UpdateCurrentPlayerText(Character character) {
-        if (currentPlayerText != null) {
-            if (character != null) {
+        if (currentPlayerText != null)
+            if (character != null)
                 currentPlayerText.text = $"Current Turn: {character.CharacterType}";
-            }
-            else {
+            else
                 currentPlayerText.text = "Current Turn: None";
-            }
-        }
     }
 }

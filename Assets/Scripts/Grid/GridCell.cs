@@ -34,6 +34,15 @@ public class GridCell : MonoBehaviour {
         }
     }
 
+    public void SetCellSize(float cellSize) {
+        SetCellSize(cellSize, cellSize);
+    }
+
+    public void SetCellSize(float cellWidth, float cellHeight) {
+        if (cellSpriteRenderer != null)
+            cellSpriteRenderer.size = new Vector2(cellWidth, cellHeight);
+    }
+
     public bool Equals(GridCell other) {
         return x == other.x && y == other.y;
     }

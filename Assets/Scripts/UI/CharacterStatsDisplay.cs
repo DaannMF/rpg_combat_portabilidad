@@ -52,9 +52,8 @@ public class CharacterStatsDisplay : MonoBehaviour {
             characterNameText.text = displayName;
         }
 
-        if (characterSprite != null && character.Stats.characterSprite != null) {
+        if (characterSprite != null && character.Stats.characterSprite != null)
             characterSprite.sprite = character.Stats.characterSprite;
-        }
     }
 
     private string GetFormattedCharacterName() {
@@ -71,16 +70,12 @@ public class CharacterStatsDisplay : MonoBehaviour {
     }
 
     private string GetPlayerNumber(CharacterType characterType) {
-        switch (characterType) {
-            case CharacterType.Player1:
-                return "1";
-            case CharacterType.Player2:
-                return "2";
-            case CharacterType.Player3:
-                return "3";
-            default:
-                return "?";
-        }
+        return characterType switch {
+            CharacterType.Player1 => "1",
+            CharacterType.Player2 => "2",
+            CharacterType.Player3 => "3",
+            _ => "?",
+        };
     }
 
     public void UpdateHealth(int newHealth) {

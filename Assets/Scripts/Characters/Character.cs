@@ -21,7 +21,6 @@ public abstract class Character : MonoBehaviour {
 
     public event Action<Character> OnCharacterDeath;
     public event Action<Character, int> OnHealthChanged;
-    public event Action<Character, GridCell> OnPositionChanged;
 
     protected virtual void Start() {
         Initialize();
@@ -38,14 +37,12 @@ public abstract class Character : MonoBehaviour {
 
     public virtual void SetPosition(GridCell position) {
         currentPosition = position;
-        OnPositionChanged?.Invoke(this, position);
     }
 
     public virtual void SetStats(BaseCharacterStats newStats) {
         stats = newStats;
-        if (stats != null) {
+        if (stats != null)
             currentHealth = stats.maxHealth;
-        }
     }
 
     public virtual void SetCharacterType(CharacterType type) {
@@ -64,7 +61,6 @@ public abstract class Character : MonoBehaviour {
 
         currentPosition = targetPosition;
         hasMovedThisTurn = true;
-        OnPositionChanged?.Invoke(this, targetPosition);
     }
 
     public virtual bool CanAttack(Character target) {
@@ -74,25 +70,14 @@ public abstract class Character : MonoBehaviour {
         return stats.CanAttackAtDistance(distance);
     }
 
-    public virtual void Attack(Character target) {
-        if (!CanAttack(target)) return;
-
-        int distance = currentPosition.GetChebyshevDistance(target.CurrentPosition);
-        int damage = stats.GetAttackDamage(distance);
-
-        target.TakeDamage(damage);
-        hasActedThisTurn = true;
-    }
-
     public virtual void TakeDamage(int damage) {
         if (isDead) return;
 
         currentHealth = Mathf.Max(0, currentHealth - damage);
         OnHealthChanged?.Invoke(this, currentHealth);
 
-        if (currentHealth <= 0) {
+        if (currentHealth <= 0)
             Die();
-        }
     }
 
     public virtual void RestoreHealth(int healing) {
@@ -106,9 +91,8 @@ public abstract class Character : MonoBehaviour {
         isDead = true;
 
         SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
-        if (spriteRenderer != null) {
+        if (spriteRenderer != null)
             spriteRenderer.enabled = false;
-        }
 
         OnCharacterDeath?.Invoke(this);
     }

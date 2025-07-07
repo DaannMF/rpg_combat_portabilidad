@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 public class CharacterStatsUI : MonoBehaviour {
     [Header("UI References")]
@@ -41,7 +42,9 @@ public class CharacterStatsUI : MonoBehaviour {
     }
 
     private void InitializeDisplays() {
-        if (gameManager == null || characterStatsContainer == null || characterStatsPrefab == null) return;
+        Assert.IsNotNull(characterStatsContainer, "CharacterStatsContainer is not assigned in CharacterStatsUI");
+        Assert.IsNotNull(characterStatsPrefab, "CharacterStatsPrefab is not assigned in CharacterStatsUI");
+        Assert.IsNotNull(gameManager, "GameManager is not found in CharacterStatsUI");
 
         var allCharacters = new List<Character>();
         allCharacters.AddRange(gameManager.GetAllPlayers());
@@ -57,8 +60,7 @@ public class CharacterStatsUI : MonoBehaviour {
         GameObject displayObject = Instantiate(characterStatsPrefab, characterStatsContainer);
         CharacterStatsDisplay display = displayObject.GetComponent<CharacterStatsDisplay>();
 
-        if (display == null)
-            Debug.LogError("CharacterStatsDisplay component not found on characterStatsPrefab");
+        if (display == null) return;
 
         display.Initialize(character);
         characterDisplays[character] = display;
@@ -70,32 +72,41 @@ public class CharacterStatsUI : MonoBehaviour {
     private void OnTurnStart(Character character) {
         ClearActiveIndicators();
 
-        if (characterDisplays.ContainsKey(character)) {
+        if (characterDisplays.ContainsKey(character))
             characterDisplays[character].SetActiveIndicator(true);
-        }
     }
 
     private void OnTurnEnd(Character character) {
-        if (characterDisplays.ContainsKey(character)) {
+        if (characterDisplays.ContainsKey(character))
             characterDisplays[character].SetActiveIndicator(false);
-        }
     }
 
     private void ClearActiveIndicators() {
-        foreach (var display in characterDisplays.Values) {
+        foreach (var display in characterDisplays.Values)
             display.SetActiveIndicator(false);
-        }
     }
 
     private void OnCharacterHealthChanged(Character character, int newHealth) {
-        if (characterDisplays.ContainsKey(character)) {
+        if (characterDisplays.ContainsKey(character))
             characterDisplays[character].UpdateHealth(newHealth);
-        }
     }
 
     private void OnCharacterDeath(Character character) {
-        if (characterDisplays.ContainsKey(character)) {
+        if (characterDisplays.ContainsKey(character))
             characterDisplays[character].UpdateDeathStatus(true);
+    }
+
+    public void ClearDisplays() {
+        foreach (var kvp in characterDisplays) {
+            if (kvp.Key != null) {
+                kvp.Key.OnHealthChanged -= OnCharacterHealthChanged;
+                kvp.Key.OnCharacterDeath -= OnCharacterDeath;
+            }
+
+            if (kvp.Value != null)
+                Destroy(kvp.Value.gameObject);
         }
+
+        characterDisplays.Clear();
     }
 }

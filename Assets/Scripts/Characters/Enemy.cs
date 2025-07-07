@@ -49,15 +49,14 @@ public class Enemy : Character {
             if (bestMove != null) {
                 gridSystem.SetCharacterPosition(this, bestMove);
                 MoveTo(bestMove);
-                transform.position = gridSystem.GetWorldPosition(bestMove);
+                transform.position = gridSystem.GetCharacterWorldPosition(bestMove);
             }
-            else {
+            else
                 hasMovedThisTurn = true;
-            }
+
         }
-        else {
+        else
             hasMovedThisTurn = true;
-        }
     }
 
     private GridCell FindBestMovePosition(List<GridCell> validMoves) {
@@ -75,9 +74,8 @@ public class Enemy : Character {
                 int distance = move.GetChebyshevDistance(player.CurrentPosition);
 
                 // Prefer moves that put us in attack range
-                if (distance == 1) {
-                    return move;
-                }
+                if (distance == 1) return move;
+
 
                 // Otherwise, find the move that gets us closest
                 if (distance < shortestDistance) {
@@ -94,7 +92,10 @@ public class Enemy : Character {
         Character targetPlayer = FindNearestPlayer();
 
         if (targetPlayer != null && CanAttack(targetPlayer)) {
-            Attack(targetPlayer);
+            int distance = currentPosition.GetChebyshevDistance(targetPlayer.CurrentPosition);
+            int damage = stats.GetAttackDamage(distance);
+            targetPlayer.TakeDamage(damage);
+            hasActedThisTurn = true;
         }
         else {
             hasActedThisTurn = true;
@@ -109,16 +110,14 @@ public class Enemy : Character {
 
         // First, try to find players in attack range
         var attackableTargets = new List<Character>();
-        foreach (var player in alivePlayers) {
-            if (CanAttack(player)) {
+        foreach (var player in alivePlayers)
+            if (CanAttack(player))
                 attackableTargets.Add(player);
-            }
-        }
 
-        if (attackableTargets.Count > 0) {
+        if (attackableTargets.Count > 0)
             // Prioritize targets by health (attack weakest first)
             return attackableTargets.OrderBy(p => p.CurrentHealth).First();
-        }
+
 
         // If no attackable targets, find nearest player
         Character nearestPlayer = null;

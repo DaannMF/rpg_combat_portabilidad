@@ -10,16 +10,17 @@ public class TurnManager : MonoBehaviour {
     private List<Character> allCharacters = new List<Character>();
     private int currentTurnIndex = 0;
     private bool isProcessingTurn = false;
+    private bool isGameStopped = false;
     private PlayerActionController actionController;
 
     public Character CurrentCharacter { get; private set; }
 
     public event Action<Character> OnTurnStart;
     public event Action<Character> OnTurnEnd;
-    public event Action OnRoundStart;
-    public event Action OnRoundEnd;
 
     private void Update() {
+        if (isGameStopped) return;
+
         if (isProcessingTurn && CurrentCharacter != null) {
             if (CurrentCharacter.HasFinishedTurn) {
                 EndCurrentTurn();
@@ -42,6 +43,7 @@ public class TurnManager : MonoBehaviour {
         allCharacters = characters.ToList();
         currentTurnIndex = -1;
         isProcessingTurn = false;
+        isGameStopped = false;
 
         foreach (var character in allCharacters) {
             character.OnCharacterDeath += OnCharacterDeath;
@@ -52,15 +54,23 @@ public class TurnManager : MonoBehaviour {
         actionController = controller;
     }
 
-    public void StartGame() {
-        if (allCharacters.Count == 0) return;
+    public void ResetGame() {
+        isGameStopped = false;
+        isProcessingTurn = false;
+        CurrentCharacter = null;
+        currentTurnIndex = -1;
 
-        OnRoundStart?.Invoke();
+        CancelInvoke(nameof(StartNextTurn));
+    }
+
+    public void StartGame() {
+        if (allCharacters.Count == 0 || isGameStopped) return;
+
         StartNextTurn();
     }
 
     public void StartNextTurn() {
-        if (isProcessingTurn) return;
+        if (isProcessingTurn || isGameStopped) return;
 
         FindNextValidCharacter();
 
@@ -85,7 +95,7 @@ public class TurnManager : MonoBehaviour {
     }
 
     public void EndCurrentTurn() {
-        if (!isProcessingTurn || CurrentCharacter == null) return;
+        if (!isProcessingTurn || CurrentCharacter == null || isGameStopped) return;
 
         Character finishedCharacter = CurrentCharacter;
         finishedCharacter.EndTurn();
@@ -93,11 +103,11 @@ public class TurnManager : MonoBehaviour {
 
         isProcessingTurn = false;
 
-        if (finishedCharacter is Player player) {
+        if (finishedCharacter is Player player)
             player.SetAsCurrentPlayer(false);
-        }
 
-        Invoke(nameof(StartNextTurn), turnTransitionDelay);
+        if (!isGameStopped)
+            Invoke(nameof(StartNextTurn), turnTransitionDelay);
     }
 
     private void FindNextValidCharacter() {
@@ -120,31 +130,41 @@ public class TurnManager : MonoBehaviour {
     }
 
     private void OnCharacterDeath(Character deadCharacter) {
-        if (deadCharacter == CurrentCharacter && isProcessingTurn) {
+        if (deadCharacter == CurrentCharacter && isProcessingTurn)
             EndCurrentTurn();
-        }
     }
 
     private void EndRound() {
-        OnRoundEnd?.Invoke();
+        if (isGameStopped) return;
 
         bool anyPlayersAlive = allCharacters.Any(c => c.CharacterType.IsPlayer() && !c.IsDead);
         bool anyEnemiesAlive = allCharacters.Any(c => c.CharacterType.IsEnemy() && !c.IsDead);
 
-        if (!anyPlayersAlive || !anyEnemiesAlive) {
+        if (!anyPlayersAlive || !anyEnemiesAlive)
             return;
-        }
 
         currentTurnIndex = -1;
-        OnRoundStart?.Invoke();
         StartNextTurn();
     }
 
     public void ForceEndTurn() {
-        if (CurrentCharacter is Player player) {
+        if (isGameStopped) return;
+
+        if (CurrentCharacter is Player player)
             player.EndTurn();
-        }
 
         EndCurrentTurn();
+    }
+
+    public void StopGame() {
+        isGameStopped = true;
+        isProcessingTurn = false;
+        CurrentCharacter = null;
+
+        CancelInvoke(nameof(StartNextTurn));
+
+        foreach (var character in allCharacters)
+            if (character is Player player)
+                player.SetAsCurrentPlayer(false);
     }
 }

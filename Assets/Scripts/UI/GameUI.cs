@@ -34,18 +34,19 @@ public class GameUI : MonoBehaviour {
             restartButton.onClick.RemoveListener(RestartGame);
         }
     }
+
     private void InitializeUI() {
-        if (gameOverPanel != null) {
+        if (gameOverPanel != null)
             gameOverPanel.SetActive(false);
-        }
     }
 
-    private void OnGameWon() {
-        ShowGameOverPanel("VICTORY!", "All enemies defeated!");
+    private void OnGameWon(Character winner) {
+        string winnerName = winner != null ? winner.Stats.characterName : "Unknown Player";
+        ShowGameOverPanel("VICTORY!", $"{winnerName} wins!");
     }
 
     private void OnGameLost() {
-        ShowGameOverPanel("DEFEAT!", "All players died!");
+        ShowGameOverPanel("DEFEAT!", "All players LOST!");
     }
 
     private void ShowGameOverPanel(string title, string message) {
@@ -53,22 +54,21 @@ public class GameUI : MonoBehaviour {
             gameOverPanel.SetActive(true);
 
             TMP_Text titleText = gameOverPanel.transform.Find("Title")?.GetComponent<TMP_Text>();
-            if (titleText != null) {
+            if (titleText != null)
                 titleText.text = title;
-            }
 
             TMP_Text messageText = gameOverPanel.transform.Find("Message")?.GetComponent<TMP_Text>();
-            if (messageText != null) {
+            if (messageText != null)
                 messageText.text = message;
-            }
         }
     }
 
     private void RestartGame() {
-        if (gameManager != null)
+        if (gameManager != null && (gameManager.CurrentGameState == GameState.Won || gameManager.CurrentGameState == GameState.Lost)) {
             gameManager.RestartGame();
 
-        if (gameOverPanel != null)
-            gameOverPanel.SetActive(false);
+            if (gameOverPanel != null)
+                gameOverPanel.SetActive(false);
+        }
     }
 }

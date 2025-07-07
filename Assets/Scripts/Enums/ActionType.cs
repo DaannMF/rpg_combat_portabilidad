@@ -13,7 +13,7 @@ public static class ActionTypeExtensions {
             ActionType.MeleeAttack => "Melee Attack",
             ActionType.RangedAttack => "Ranged Attack",
             ActionType.HealSelf => "Heal Self",
-            ActionType.HealOther => "Heal Ally",
+            ActionType.HealOther => "Heal Other",
             ActionType.Move => "Move",
             ActionType.EndTurn => "End Turn",
             _ => actionType.ToString()

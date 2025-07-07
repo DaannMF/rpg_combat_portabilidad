@@ -19,24 +19,22 @@ public class GameManager : MonoBehaviour {
 
     [Header("UI References")]
     [SerializeField] private PlayerActionUI playerActionUI;
+    [SerializeField] private CharacterStatsUI characterStatsUI;
 
-    public event Action OnGameWon;
+    public event Action<Character> OnGameWon;
     public event Action OnGameLost;
     public event Action OnCharactersSpawned;
 
+    private GameState currentGameState = GameState.NotStarted;
     private List<Character> allCharacters = new List<Character>();
     private List<Character> players = new List<Character>();
     private List<Character> enemies = new List<Character>();
-
-    private BaseCharacterStats player1Stats;
-    private BaseCharacterStats player2Stats;
-    private BaseCharacterStats player3Stats;
-    private BaseCharacterStats enemyStats;
 
     private PlayerActionController actionController;
     private MovementSystem movementSystem;
     private PlayerAbilitySystem abilitySystem;
 
+    public GameState CurrentGameState => currentGameState;
 
     private void Start() {
         InitializeGame();
@@ -59,8 +57,10 @@ public class GameManager : MonoBehaviour {
         if (turnManager == null)
             turnManager = GetComponentInChildren<TurnManager>();
 
+        if (characterStatsUI == null)
+            characterStatsUI = FindFirstObjectByType<CharacterStatsUI>();
+
         InitializeSystems();
-        CreateCharacterStats();
         SpawnCharacters();
 
         OnCharactersSpawned?.Invoke();
@@ -81,32 +81,34 @@ public class GameManager : MonoBehaviour {
             playerActionUI.Initialize(actionController);
     }
 
-    private void CreateCharacterStats() {
-        player1Stats = CharacterStatsConfigurator.CreatePlayer1Stats();
-        player1Stats.characterSprite = fighterSprite;
+    private BaseCharacterStats CreatePlayerStats(CharacterType playerType) {
+        BaseCharacterStats stats = playerType switch {
+            CharacterType.Player1 => CharacterStatsConfigurator.CreatePlayer1Stats(),
+            CharacterType.Player2 => CharacterStatsConfigurator.CreatePlayer2Stats(),
+            CharacterType.Player3 => CharacterStatsConfigurator.CreatePlayer3Stats(),
+            _ => throw new ArgumentException($"Invalid player type: {playerType}")
+        };
 
-        player2Stats = CharacterStatsConfigurator.CreatePlayer2Stats();
-        player2Stats.characterSprite = healerSprite;
+        stats.characterSprite = playerType switch {
+            CharacterType.Player1 => fighterSprite,
+            CharacterType.Player2 => healerSprite,
+            CharacterType.Player3 => rangeSprite,
+            _ => null
+        };
 
-        player3Stats = CharacterStatsConfigurator.CreatePlayer3Stats();
-        player3Stats.characterSprite = rangeSprite;
-
-        enemyStats = CharacterStatsConfigurator.CreateEnemyStats();
+        return stats;
     }
 
     private void SpawnCharacters() {
         List<GridCell> availablePositions = gridSystem.GetAvailablePositions();
 
-        if (availablePositions.Count < 5) {
-            Debug.LogError("Not enough available positions to spawn all characters!");
-            return;
-        }
+        if (availablePositions.Count < 5) return;
 
         List<GridCell> spawnPositions = GetRandomPositions(availablePositions, 5);
 
-        SpawnPlayer(CharacterType.Player1, spawnPositions[0], player1Stats, fighterSprite);
-        SpawnPlayer(CharacterType.Player2, spawnPositions[1], player2Stats, healerSprite);
-        SpawnPlayer(CharacterType.Player3, spawnPositions[2], player3Stats, rangeSprite);
+        SpawnPlayer(CharacterType.Player1, spawnPositions[0], CreatePlayerStats(CharacterType.Player1), fighterSprite);
+        SpawnPlayer(CharacterType.Player2, spawnPositions[1], CreatePlayerStats(CharacterType.Player2), healerSprite);
+        SpawnPlayer(CharacterType.Player3, spawnPositions[2], CreatePlayerStats(CharacterType.Player3), rangeSprite);
         SpawnEnemy(spawnPositions[3], CreateEnemyStats(1), GetEnemySprite(0));
         SpawnEnemy(spawnPositions[4], CreateEnemyStats(2), GetEnemySprite(1));
     }
@@ -125,11 +127,7 @@ public class GameManager : MonoBehaviour {
     }
 
     private Sprite GetEnemySprite(int enemyIndex) {
-        if (enemySprites == null || enemySprites.Length == 0) {
-            Debug.LogWarning("No enemy sprites configured!");
-            return null;
-        }
-
+        if (enemySprites == null || enemySprites.Length == 0) return null;
         return enemySprites[enemyIndex % enemySprites.Length];
     }
 
@@ -145,8 +143,8 @@ public class GameManager : MonoBehaviour {
     }
 
     private void SpawnPlayer(CharacterType type, GridCell position, BaseCharacterStats stats, Sprite sprite) {
-        Vector2 spritePositionWithOffset = gridSystem.GetWorldPosition(position) + new Vector2(0, 0.2f);
-        GameObject playerObject = Instantiate(characterPrefab, spritePositionWithOffset, Quaternion.identity, transform);
+        Vector2 characterWorldPosition = gridSystem.GetCharacterWorldPosition(position);
+        GameObject playerObject = Instantiate(characterPrefab, characterWorldPosition, Quaternion.identity, transform);
         Player player = playerObject.GetComponent<Player>();
         if (!player) player = playerObject.AddComponent<Player>();
 
@@ -160,8 +158,8 @@ public class GameManager : MonoBehaviour {
     }
 
     private void SpawnEnemy(GridCell position, BaseCharacterStats stats, Sprite sprite) {
-        Vector2 spritePositionWithOffset = gridSystem.GetWorldPosition(position) + new Vector2(0, 0.2f);
-        GameObject enemyObject = Instantiate(characterPrefab, spritePositionWithOffset, Quaternion.identity, transform);
+        Vector2 characterWorldPosition = gridSystem.GetCharacterWorldPosition(position);
+        GameObject enemyObject = Instantiate(characterPrefab, characterWorldPosition, Quaternion.identity, transform);
         Enemy enemy = enemyObject.GetComponent<Enemy>();
         if (!enemy) enemy = enemyObject.AddComponent<Enemy>();
 
@@ -186,7 +184,6 @@ public class GameManager : MonoBehaviour {
     private void SetupTurnManager() {
         turnManager.Initialize(allCharacters);
 
-        // Set action controller in turn manager
         if (actionController != null) {
             actionController.Initialize(allCharacters);
             turnManager.SetActionController(actionController);
@@ -194,10 +191,13 @@ public class GameManager : MonoBehaviour {
     }
 
     private void StartGame() {
+        currentGameState = GameState.Playing;
         turnManager.StartGame();
     }
 
     private void OnPlayerDeath(Character player) {
+        if (currentGameState != GameState.Playing) return;
+
         gridSystem.RemoveCharacterFromGrid(player);
 
         bool anyEnemiesAlive = enemies.Any(e => !e.IsDead);
@@ -210,23 +210,55 @@ public class GameManager : MonoBehaviour {
     }
 
     private void OnEnemyDeath(Character enemy) {
+        if (currentGameState != GameState.Playing) return;
+
         gridSystem.RemoveCharacterFromGrid(enemy);
         CheckGameOverConditions();
     }
 
     private void CheckGameOverConditions() {
+        if (currentGameState != GameState.Playing) return;
+
         bool anyEnemiesAlive = enemies.Any(e => !e.IsDead);
         int playersAlive = players.Count(p => !p.IsDead);
 
-        if (!anyEnemiesAlive && playersAlive == 1)
-            GameOver(true);
+        if (!anyEnemiesAlive && playersAlive == 1) {
+            Character winner = players.First(p => !p.IsDead);
+            GameOver(true, winner);
+        }
     }
 
-    private void GameOver(bool victory) {
-        if (victory)
-            OnGameWon?.Invoke();
+    private void GameOver(bool victory, Character winner = null) {
+        if (currentGameState != GameState.Playing) return;
+
+        currentGameState = victory ? GameState.Won : GameState.Lost;
+
+        StopAllSystems();
+
+        if (victory && winner != null)
+            OnGameWon?.Invoke(winner);
         else
             OnGameLost?.Invoke();
+    }
+
+    private void StopAllSystems() {
+        if (turnManager != null)
+            turnManager.StopGame();
+
+        if (playerActionUI != null)
+            playerActionUI.gameObject.SetActive(false);
+
+        if (characterStatsUI != null) {
+            characterStatsUI.ClearDisplays();
+            characterStatsUI.gameObject.SetActive(false);
+        }
+
+        foreach (var character in allCharacters)
+            if (character != null)
+                character.gameObject.SetActive(false);
+
+        if (gridSystem != null)
+            gridSystem.gameObject.SetActive(false);
     }
 
     public List<Character> GetAllPlayers() {
@@ -238,6 +270,8 @@ public class GameManager : MonoBehaviour {
     }
 
     public void RestartGame() {
+        currentGameState = GameState.NotStarted;
+
         foreach (var character in allCharacters)
             if (character != null)
                 Destroy(character.gameObject);
@@ -246,6 +280,23 @@ public class GameManager : MonoBehaviour {
         players.Clear();
         enemies.Clear();
 
+        ReactivateAllSystems();
         InitializeGame();
+    }
+
+    private void ReactivateAllSystems() {
+        if (turnManager != null) {
+            turnManager.gameObject.SetActive(true);
+            turnManager.ResetGame();
+        }
+
+        if (playerActionUI != null)
+            playerActionUI.gameObject.SetActive(true);
+
+        if (characterStatsUI != null)
+            characterStatsUI.gameObject.SetActive(true);
+
+        if (gridSystem != null)
+            gridSystem.gameObject.SetActive(true);
     }
 }

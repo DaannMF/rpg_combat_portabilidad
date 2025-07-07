@@ -22,17 +22,14 @@ public class PlayerAbilitySystem : IPlayerAbilitySystem {
         foreach (var target in otherCharacters) {
             int distance = character.CurrentPosition.GetChebyshevDistance(target.CurrentPosition);
 
-            if (character.Stats.canHealOthers && distance <= character.Stats.maxHealingDistance) {
+            if (character.Stats.canHealOthers && distance <= character.Stats.maxHealingDistance)
                 actions.Add(new PlayerAction(ActionType.HealOther, target, distance));
-            }
 
-            if (distance == 1 && character.Stats.meleeAttackDamage > 0) {
+            if (distance == 1 && character.Stats.meleeAttackDamage > 0)
                 actions.Add(new PlayerAction(ActionType.MeleeAttack, target, distance));
-            }
 
-            if (character.Stats.canUseRangedAttack && distance > 1 && distance <= character.Stats.maxRangedDistance) {
+            if (character.Stats.canUseRangedAttack && distance > 1 && distance <= character.Stats.maxRangedDistance)
                 actions.Add(new PlayerAction(ActionType.RangedAttack, target, distance));
-            }
         }
 
         return actions;

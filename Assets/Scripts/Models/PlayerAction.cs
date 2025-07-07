@@ -1,8 +1,7 @@
 using System;
 
 [Serializable]
-public class PlayerAction
-{
+public class PlayerAction {
     public ActionType actionType;
     public string displayName;
     public bool isAvailable;
@@ -10,8 +9,7 @@ public class PlayerAction
     public int requiredDistance;
     public bool requiresTarget;
 
-    public PlayerAction(ActionType type, bool requiresTarget = false, int requiredDistance = 0)
-    {
+    public PlayerAction(ActionType type, bool requiresTarget = false, int requiredDistance = 0) {
         actionType = type;
         displayName = type.GetDisplayName();
         isAvailable = false;
@@ -20,8 +18,7 @@ public class PlayerAction
         this.requiresTarget = requiresTarget;
     }
 
-    public PlayerAction(ActionType type, Character target, int requiredDistance = 0)
-    {
+    public PlayerAction(ActionType type, Character target, int requiredDistance = 0) {
         actionType = type;
         displayName = type.GetDisplayName();
         isAvailable = true;
