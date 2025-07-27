@@ -18,7 +18,7 @@ public class GridSystem : MonoBehaviour {
     [SerializeField] private Vector2 characterSpriteOffset = new Vector2(0, 0.2f);
 
     private GridCell[,] grid;
-    private Dictionary<GridCell, Character> characterPositions;
+    private Dictionary<GridCell, BaseCharacter> characterPositions;
     private Vector2 gridOrigin;
     private float calculatedCellWidth;
     private float calculatedCellHeight;
@@ -31,7 +31,7 @@ public class GridSystem : MonoBehaviour {
         CalculateCellSizeAndOrigin();
 
         grid = new GridCell[width, height];
-        characterPositions = new Dictionary<GridCell, Character>();
+        characterPositions = new Dictionary<GridCell, BaseCharacter>();
 
         CreateGridCells();
     }
@@ -129,19 +129,11 @@ public class GridSystem : MonoBehaviour {
         return gridOrigin + new Vector2(x * cellWidthWithSpacing, y * cellHeightWithSpacing);
     }
 
-    public Vector2 GetWorldPosition(GridCell cell) {
-        return GetWorldPosition(cell.x, cell.y);
-    }
-
-    public Vector2 GetCharacterWorldPosition(int x, int y) {
+    public Vector2 GetCharacterWorldPosition(GridCell cell) {
         float cellWidthWithSpacing = calculatedCellWidth + cellSpacing;
         float cellHeightWithSpacing = calculatedCellHeight + cellSpacing;
-        Vector2 cellCenter = gridOrigin + new Vector2(x * cellWidthWithSpacing, y * cellHeightWithSpacing);
+        Vector2 cellCenter = gridOrigin + new Vector2(cell.x * cellWidthWithSpacing, cell.y * cellHeightWithSpacing);
         return cellCenter + characterSpriteOffset;
-    }
-
-    public Vector2 GetCharacterWorldPosition(GridCell cell) {
-        return GetCharacterWorldPosition(cell.x, cell.y);
     }
 
     public bool IsValidPosition(int x, int y) {
@@ -160,7 +152,7 @@ public class GridSystem : MonoBehaviour {
         return IsValidPosition(cell) && !IsPositionOccupied(cell);
     }
 
-    public void SetCharacterPosition(Character character, GridCell cell) {
+    public void SetCharacterPosition(BaseCharacter character, GridCell cell) {
         if (characterPositions.ContainsValue(character)) {
             GridCell oldCell = characterPositions.FirstOrDefault(x => x.Value == character).Key;
             characterPositions.Remove(oldCell);
@@ -169,7 +161,7 @@ public class GridSystem : MonoBehaviour {
         characterPositions[cell] = character;
     }
 
-    public void RemoveCharacterFromGrid(Character character) {
+    public void RemoveCharacterFromGrid(BaseCharacter character) {
         if (characterPositions.ContainsValue(character)) {
             GridCell oldCell = characterPositions.FirstOrDefault(x => x.Value == character).Key;
             characterPositions.Remove(oldCell);
@@ -186,8 +178,12 @@ public class GridSystem : MonoBehaviour {
                 GridCell targetCell = GetGridCell(x, y);
                 if (targetCell == null || targetCell.Equals(fromCell)) continue;
 
-                int distance = fromCell.GetChebyshevDistance(targetCell);
-                if (distance <= maxDistance && !IsPositionOccupied(targetCell)) {
+                // Calcular el costo real de movimiento (considerando que solo se permiten movimientos ortogonales)
+                int dx = Mathf.Abs(targetCell.x - fromCell.x);
+                int dy = Mathf.Abs(targetCell.y - fromCell.y);
+                int realMovementCost = Mathf.Max(dx, dy) + Mathf.Min(dx, dy);
+
+                if (realMovementCost <= maxDistance && !IsPositionOccupied(targetCell)) {
                     validPositions.Add(targetCell);
                 }
             }

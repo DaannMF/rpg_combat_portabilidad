@@ -13,14 +13,14 @@ public class ActionTargetGrid : MonoBehaviour {
 
     private ActionType actionType;
     private List<CharacterTargetButton> targetButtons = new List<CharacterTargetButton>();
-    private Action<ActionType, Character> onTargetSelected;
+    private Action<ActionType, BaseCharacter> onTargetSelected;
 
     private void Awake() {
         if (gridLayout == null)
             gridLayout = GetComponentInChildren<GridLayoutGroup>();
     }
 
-    public void Setup(ActionType actionType, Action<ActionType, Character> onTargetSelected) {
+    public void Setup(ActionType actionType, Action<ActionType, BaseCharacter> onTargetSelected) {
         this.actionType = actionType;
         this.onTargetSelected = onTargetSelected;
 
@@ -30,7 +30,7 @@ public class ActionTargetGrid : MonoBehaviour {
         ClearTargets();
     }
 
-    public void UpdateTargets(List<Character> availableTargets) {
+    public void UpdateTargets(List<BaseCharacter> availableTargets) {
         ClearTargets();
 
         if (availableTargets == null || availableTargets.Count == 0) {
@@ -44,7 +44,7 @@ public class ActionTargetGrid : MonoBehaviour {
             CreateTargetButton(target);
     }
 
-    private void CreateTargetButton(Character target) {
+    private void CreateTargetButton(BaseCharacter target) {
         if (targetButtonPrefab == null || targetButtonContainer == null) return;
 
         GameObject buttonObj = Instantiate(targetButtonPrefab, targetButtonContainer);

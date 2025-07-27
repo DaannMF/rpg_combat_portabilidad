@@ -14,7 +14,7 @@ public class PlayerActionUI : MonoBehaviour {
 
     private List<ActionTargetGrid> actionGrids = new List<ActionTargetGrid>();
     private PlayerActionController actionController;
-    private Character currentPlayer;
+    private BaseCharacter currentPlayer;
     private TurnManager turnManager;
 
     private void OnDestroy() {
@@ -61,7 +61,7 @@ public class PlayerActionUI : MonoBehaviour {
 
     }
 
-    public void SetCurrentPlayer(Character player) {
+    public void SetCurrentPlayer(BaseCharacter player) {
         currentPlayer = player;
         UpdateCurrentPlayerText(player);
         SetUIActive(player != null && player.CharacterType.IsPlayer());
@@ -110,7 +110,7 @@ public class PlayerActionUI : MonoBehaviour {
         actionGrids.Clear();
     }
 
-    private void OnTargetSelected(ActionType actionType, Character target) {
+    private void OnTargetSelected(ActionType actionType, BaseCharacter target) {
         if (currentPlayer == null || actionController == null) return;
         actionController.TryExecuteActionOnTarget(currentPlayer, actionType, target);
     }
@@ -139,7 +139,7 @@ public class PlayerActionUI : MonoBehaviour {
             SetUIActive(false);
     }
 
-    private void OnTurnStart(Character character) {
+    private void OnTurnStart(BaseCharacter character) {
         UpdateCurrentPlayerText(character);
 
         if (character != null && character.CharacterType.IsPlayer())
@@ -150,14 +150,14 @@ public class PlayerActionUI : MonoBehaviour {
         }
     }
 
-    private void OnTurnEnd(Character character) {
+    private void OnTurnEnd(BaseCharacter character) {
         if (character != null && character.CharacterType.IsPlayer()) {
             currentPlayer = null;
             SetUIActive(false);
         }
     }
 
-    private void UpdateCurrentPlayerText(Character character) {
+    private void UpdateCurrentPlayerText(BaseCharacter character) {
         if (currentPlayerText != null)
             if (character != null)
                 currentPlayerText.text = $"Current Turn: {character.CharacterType}";

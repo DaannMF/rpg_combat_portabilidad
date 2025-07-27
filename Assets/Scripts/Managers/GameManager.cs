@@ -20,27 +20,37 @@ public class GameManager : MonoBehaviour {
     [Header("UI References")]
     [SerializeField] private PlayerActionUI playerActionUI;
     [SerializeField] private CharacterStatsUI characterStatsUI;
+    [SerializeField] private MenuCanvasUI menuCanvas;
 
-    public event Action<Character> OnGameWon;
-    public event Action OnGameLost;
+    [Header("Input System")]
+    [SerializeField] private InputManager inputManager;
+
     public event Action OnCharactersSpawned;
+    public event Action OnInterstitialAdRequested;
 
     private GameState currentGameState = GameState.NotStarted;
-    private List<Character> allCharacters = new List<Character>();
-    private List<Character> players = new List<Character>();
-    private List<Character> enemies = new List<Character>();
+    private List<BaseCharacter> allCharacters = new List<BaseCharacter>();
+    private List<BaseCharacter> players = new List<BaseCharacter>();
+    private List<BaseCharacter> enemies = new List<BaseCharacter>();
 
     private PlayerActionController actionController;
     private MovementSystem movementSystem;
     private PlayerAbilitySystem abilitySystem;
 
     public GameState CurrentGameState => currentGameState;
+    void Awake() {
+        UIEvents.OnGamePaused += OnGamePaused;
+        UIEvents.OnGameResumed += OnGameResumed;
+    }
 
     private void Start() {
         InitializeGame();
     }
 
     private void OnDestroy() {
+        UIEvents.OnGamePaused -= OnGamePaused;
+        UIEvents.OnGameResumed -= OnGameResumed;
+
         foreach (var player in players)
             if (player != null)
                 player.OnCharacterDeath -= OnPlayerDeath;
@@ -60,6 +70,9 @@ public class GameManager : MonoBehaviour {
         if (characterStatsUI == null)
             characterStatsUI = FindFirstObjectByType<CharacterStatsUI>();
 
+        if (inputManager == null)
+            inputManager = FindFirstObjectByType<InputManager>();
+
         InitializeSystems();
         SpawnCharacters();
 
@@ -74,6 +87,11 @@ public class GameManager : MonoBehaviour {
         movementSystem = new MovementSystem(gridSystem);
         abilitySystem = new PlayerAbilitySystem();
         actionController = new PlayerActionController(abilitySystem, movementSystem);
+
+        if (inputManager != null) {
+            GridVisualFeedbackSystem visualFeedbackSystem = new GridVisualFeedbackSystem(gridSystem, movementSystem);
+            inputManager.Initialize(actionController, visualFeedbackSystem);
+        }
     }
 
     private void SetupUI() {
@@ -169,7 +187,7 @@ public class GameManager : MonoBehaviour {
         enemy.OnCharacterDeath += OnEnemyDeath;
     }
 
-    private void SetupCharacter(Character character, CharacterType type, GridCell position, BaseCharacterStats stats, Sprite sprite) {
+    private void SetupCharacter(BaseCharacter character, CharacterType type, GridCell position, BaseCharacterStats stats, Sprite sprite) {
         character.SetStats(stats);
         character.SetCharacterType(type);
         character.SetPosition(position);
@@ -188,6 +206,10 @@ public class GameManager : MonoBehaviour {
             actionController.Initialize(allCharacters);
             turnManager.SetActionController(actionController);
         }
+
+        if (inputManager != null) {
+            turnManager.SetInputManager(inputManager);
+        }
     }
 
     private void StartGame() {
@@ -195,7 +217,7 @@ public class GameManager : MonoBehaviour {
         turnManager.StartGame();
     }
 
-    private void OnPlayerDeath(Character player) {
+    private void OnPlayerDeath(BaseCharacter player) {
         if (currentGameState != GameState.Playing) return;
 
         gridSystem.RemoveCharacterFromGrid(player);
@@ -209,7 +231,7 @@ public class GameManager : MonoBehaviour {
         CheckGameOverConditions();
     }
 
-    private void OnEnemyDeath(Character enemy) {
+    private void OnEnemyDeath(BaseCharacter enemy) {
         if (currentGameState != GameState.Playing) return;
 
         gridSystem.RemoveCharacterFromGrid(enemy);
@@ -223,22 +245,41 @@ public class GameManager : MonoBehaviour {
         int playersAlive = players.Count(p => !p.IsDead);
 
         if (!anyEnemiesAlive && playersAlive == 1) {
-            Character winner = players.First(p => !p.IsDead);
+            BaseCharacter winner = players.First(p => !p.IsDead);
             GameOver(true, winner);
         }
     }
 
-    private void GameOver(bool victory, Character winner = null) {
+    private void OnGamePaused() {
+        if (currentGameState != GameState.Playing) return;
+
+        StopAllSystems();
+
+        if (menuCanvas != null)
+            menuCanvas.ShowMainMenu();
+    }
+
+    private void OnGameResumed() {
+        if (currentGameState != GameState.Playing) return;
+
+        ReactivateAllSystems();
+
+        if (menuCanvas != null)
+            menuCanvas.Hide();
+    }
+
+    private void GameOver(bool victory, BaseCharacter winner = null) {
         if (currentGameState != GameState.Playing) return;
 
         currentGameState = victory ? GameState.Won : GameState.Lost;
 
         StopAllSystems();
 
-        if (victory && winner != null)
-            OnGameWon?.Invoke(winner);
-        else
-            OnGameLost?.Invoke();
+        OnInterstitialAdRequested?.Invoke();
+
+        bool isVictory = victory && winner != null;
+        if (menuCanvas != null)
+            menuCanvas.ShowGameOverPanel(isVictory, winner);
     }
 
     private void StopAllSystems() {
@@ -261,15 +302,18 @@ public class GameManager : MonoBehaviour {
             gridSystem.gameObject.SetActive(false);
     }
 
-    public List<Character> GetAllPlayers() {
+    public List<BaseCharacter> GetAllPlayers() {
         return players.ToList();
     }
 
-    public List<Character> GetAllEnemies() {
+    public List<BaseCharacter> GetAllEnemies() {
         return enemies.ToList();
     }
 
     public void RestartGame() {
+        if (menuCanvas != null)
+            menuCanvas.Hide();
+
         currentGameState = GameState.NotStarted;
 
         foreach (var character in allCharacters)

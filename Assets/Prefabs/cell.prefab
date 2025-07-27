@@ -77,12 +77,12 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 1
-  m_Sprite: {fileID: -295810639959039521, guid: 1e8ff62232fe54bca9990398315a57bc, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 1e8ff62232fe54bca9990398315a57bc, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 0.48, y: 0.48}
+  m_Size: {x: 2, y: 0.56}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -102,6 +102,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   x: 0
   y: 0
-  defaultSprite: {fileID: 0}
-  cellSpriteRenderer: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
+  defaultSprite: {fileID: 21300000, guid: 1e8ff62232fe54bca9990398315a57bc, type: 3}
+  cellSpriteRenderer: {fileID: 7616205177939680864}
+  defaultColor: {r: 1, g: 0.718063, b: 0, a: 1}
+  validMoveColor: {r: 0, g: 1, b: 0.21964121, a: 1}
+  invalidMoveColor: {r: 1, g: 0, b: 0, a: 1}
+  currentPlayerColor: {r: 0, g: 0, b: 1, a: 1}
+  clickCollider: {fileID: 0}

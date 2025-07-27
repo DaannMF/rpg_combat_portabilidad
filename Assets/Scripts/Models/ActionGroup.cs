@@ -5,17 +5,17 @@ using System.Collections.Generic;
 public class ActionGroup {
     public ActionType actionType;
     public string displayName;
-    public List<Character> availableTargets;
+    public List<BaseCharacter> availableTargets;
     public bool isAvailable;
 
     public ActionGroup(ActionType type) {
         actionType = type;
         displayName = type.GetDisplayName();
-        availableTargets = new List<Character>();
+        availableTargets = new List<BaseCharacter>();
         isAvailable = false;
     }
 
-    public void AddTarget(Character target) {
+    public void AddTarget(BaseCharacter target) {
         if (target != null && !availableTargets.Contains(target)) {
             availableTargets.Add(target);
             isAvailable = true;

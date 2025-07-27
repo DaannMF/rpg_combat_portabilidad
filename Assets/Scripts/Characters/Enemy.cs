@@ -2,7 +2,9 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class Enemy : Character {
+public class Enemy : BaseCharacter {
+    const short IDEAL_DISTANCE_TO_PLAYER = 1;
+
     [Header("Enemy Settings")]
     [SerializeField] private float turnDelay = 1f;
 
@@ -68,16 +70,12 @@ public class Enemy : Character {
         GridCell bestMove = null;
         int shortestDistance = int.MaxValue;
 
-        // Find the move that gets us closest to a player we can attack
         foreach (var move in validMoves) {
             foreach (var player in players) {
                 int distance = move.GetChebyshevDistance(player.CurrentPosition);
 
-                // Prefer moves that put us in attack range
-                if (distance == 1) return move;
+                if (distance == IDEAL_DISTANCE_TO_PLAYER) return move;
 
-
-                // Otherwise, find the move that gets us closest
                 if (distance < shortestDistance) {
                     shortestDistance = distance;
                     bestMove = move;
@@ -89,7 +87,7 @@ public class Enemy : Character {
     }
 
     private void ExecuteAttackAction() {
-        Character targetPlayer = FindNearestPlayer();
+        BaseCharacter targetPlayer = FindNearestPlayer();
 
         if (targetPlayer != null && CanAttack(targetPlayer)) {
             int distance = currentPosition.GetChebyshevDistance(targetPlayer.CurrentPosition);
@@ -102,14 +100,14 @@ public class Enemy : Character {
         }
     }
 
-    private Character FindNearestPlayer() {
+    private BaseCharacter FindNearestPlayer() {
         if (gameManager == null) return null;
 
-        List<Character> alivePlayers = gameManager.GetAllPlayers().Where(p => !p.IsDead).ToList();
+        List<BaseCharacter> alivePlayers = gameManager.GetAllPlayers().Where(p => !p.IsDead).ToList();
         if (alivePlayers.Count == 0) return null;
 
         // First, try to find players in attack range
-        var attackableTargets = new List<Character>();
+        var attackableTargets = new List<BaseCharacter>();
         foreach (var player in alivePlayers)
             if (CanAttack(player))
                 attackableTargets.Add(player);
@@ -120,7 +118,7 @@ public class Enemy : Character {
 
 
         // If no attackable targets, find nearest player
-        Character nearestPlayer = null;
+        BaseCharacter nearestPlayer = null;
         int minDistance = int.MaxValue;
 
         foreach (var player in alivePlayers) {

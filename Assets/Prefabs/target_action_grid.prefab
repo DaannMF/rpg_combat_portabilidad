@@ -245,8 +245,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4344545992026708824}
-  - component: {fileID: 5782278745863918886}
   - component: {fileID: 592466111175285031}
+  - component: {fileID: 5782278745863918886}
   m_Layer: 5
   m_Name: target_action_grid
   m_TagString: Untagged
@@ -273,24 +273,8 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 300, y: 80}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &5782278745863918886
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7825332607955511856}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b186a44f49ce441b48e62b904489aea6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  actionTypeText: {fileID: 4731992291171719380}
-  targetButtonPrefab: {fileID: 7442978044751460493, guid: 36eea1d578d474adda4d083a66d4c794, type: 3}
-  targetButtonContainer: {fileID: 5897047930497174735}
-  gridLayout: {fileID: 8560698819604063418}
 --- !u!114 &592466111175285031
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -317,3 +301,19 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &5782278745863918886
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7825332607955511856}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b186a44f49ce441b48e62b904489aea6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  actionTypeText: {fileID: 4731992291171719380}
+  targetButtonPrefab: {fileID: 7442978044751460493, guid: 36eea1d578d474adda4d083a66d4c794, type: 3}
+  targetButtonContainer: {fileID: 5897047930497174735}
+  gridLayout: {fileID: 8560698819604063418}

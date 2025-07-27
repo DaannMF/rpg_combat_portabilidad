@@ -7,16 +7,17 @@ public class TurnManager : MonoBehaviour {
     [Header("Turn Settings")]
     [SerializeField] private float turnTransitionDelay = 0.5f;
 
-    private List<Character> allCharacters = new List<Character>();
+    private List<BaseCharacter> allCharacters = new List<BaseCharacter>();
     private int currentTurnIndex = 0;
     private bool isProcessingTurn = false;
     private bool isGameStopped = false;
     private PlayerActionController actionController;
+    private InputManager inputManager;
 
-    public Character CurrentCharacter { get; private set; }
+    public BaseCharacter CurrentCharacter { get; private set; }
 
-    public event Action<Character> OnTurnStart;
-    public event Action<Character> OnTurnEnd;
+    public event Action<BaseCharacter> OnTurnStart;
+    public event Action<BaseCharacter> OnTurnEnd;
 
     private void Update() {
         if (isGameStopped) return;
@@ -39,7 +40,7 @@ public class TurnManager : MonoBehaviour {
         }
     }
 
-    public void Initialize(List<Character> characters) {
+    public void Initialize(List<BaseCharacter> characters) {
         allCharacters = characters.ToList();
         currentTurnIndex = -1;
         isProcessingTurn = false;
@@ -52,6 +53,10 @@ public class TurnManager : MonoBehaviour {
 
     public void SetActionController(PlayerActionController controller) {
         actionController = controller;
+    }
+
+    public void SetInputManager(InputManager inputMgr) {
+        inputManager = inputMgr;
     }
 
     public void ResetGame() {
@@ -87,6 +92,10 @@ public class TurnManager : MonoBehaviour {
             if (actionController != null)
                 actionController.StartPlayerTurn(player);
 
+            // Configurar el input manager para el jugador actual
+            if (inputManager != null)
+                inputManager.SetActivePlayer(player);
+
             player.ExecuteTurn();
         }
         else if (CurrentCharacter is Enemy enemy) {
@@ -97,14 +106,19 @@ public class TurnManager : MonoBehaviour {
     public void EndCurrentTurn() {
         if (!isProcessingTurn || CurrentCharacter == null || isGameStopped) return;
 
-        Character finishedCharacter = CurrentCharacter;
+        BaseCharacter finishedCharacter = CurrentCharacter;
         finishedCharacter.EndTurn();
         OnTurnEnd?.Invoke(finishedCharacter);
 
         isProcessingTurn = false;
 
-        if (finishedCharacter is Player player)
+        if (finishedCharacter is Player player) {
             player.SetAsCurrentPlayer(false);
+
+            // Terminar el turno en el input manager
+            if (inputManager != null)
+                inputManager.EndPlayerTurn();
+        }
 
         if (!isGameStopped)
             Invoke(nameof(StartNextTurn), turnTransitionDelay);
@@ -116,7 +130,7 @@ public class TurnManager : MonoBehaviour {
 
         while (attempts < maxAttempts) {
             currentTurnIndex = (currentTurnIndex + 1) % allCharacters.Count;
-            Character character = allCharacters[currentTurnIndex];
+            BaseCharacter character = allCharacters[currentTurnIndex];
 
             if (!character.IsDead) {
                 CurrentCharacter = character;
@@ -129,7 +143,7 @@ public class TurnManager : MonoBehaviour {
         CurrentCharacter = null;
     }
 
-    private void OnCharacterDeath(Character deadCharacter) {
+    private void OnCharacterDeath(BaseCharacter deadCharacter) {
         if (deadCharacter == CurrentCharacter && isProcessingTurn)
             EndCurrentTurn();
     }

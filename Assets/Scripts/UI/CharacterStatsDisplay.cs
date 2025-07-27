@@ -5,12 +5,14 @@ using TMPro;
 public class CharacterStatsDisplay : MonoBehaviour {
     [Header("UI Components")]
     [SerializeField] private Image characterSprite;
-    [SerializeField] private Outline activeOutline;
+    [SerializeField] private Image outlineImage;
+    [SerializeField] private Sprite normalSprite;
+    [SerializeField] private Sprite activeSprite;
     [SerializeField] private TMP_Text characterNameText;
     [SerializeField] private TMP_Text healthText;
     [SerializeField] private TMP_Text statusText;
 
-    private Character character;
+    private BaseCharacter character;
     private int maxHealth;
 
     private void Awake() {
@@ -21,8 +23,8 @@ public class CharacterStatsDisplay : MonoBehaviour {
         if (characterSprite == null)
             characterSprite = transform.Find("CharacterSprite")?.GetComponent<Image>();
 
-        if (activeOutline == null)
-            activeOutline = GetComponent<Outline>();
+        if (outlineImage == null)
+            outlineImage = GetComponent<Image>();
 
         if (characterNameText == null)
             characterNameText = transform.Find("CharacterName")?.GetComponent<TMP_Text>();
@@ -34,7 +36,7 @@ public class CharacterStatsDisplay : MonoBehaviour {
             statusText = transform.Find("StatusText")?.GetComponent<TMP_Text>();
     }
 
-    public void Initialize(Character character) {
+    public void Initialize(BaseCharacter character) {
         this.character = character;
         this.maxHealth = character.Stats.maxHealth;
 
@@ -98,9 +100,7 @@ public class CharacterStatsDisplay : MonoBehaviour {
     }
 
     public void SetActiveIndicator(bool active) {
-        if (activeOutline != null) {
-            activeOutline.enabled = active;
-        }
+        outlineImage.sprite = active ? activeSprite : normalSprite;
     }
 
     private void UpdateDisplay() {

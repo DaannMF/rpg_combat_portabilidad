@@ -7,9 +7,9 @@ public class CharacterTargetButton : MonoBehaviour {
     [SerializeField] private Button button;
     [SerializeField] private Image characterImage;
 
-    private Character targetCharacter;
+    private BaseCharacter targetCharacter;
     private ActionType actionType;
-    private Action<ActionType, Character> onClickCallback;
+    private Action<ActionType, BaseCharacter> onClickCallback;
 
     private void Awake() {
         if (button == null)
@@ -19,7 +19,7 @@ public class CharacterTargetButton : MonoBehaviour {
             characterImage = GetComponent<Image>();
     }
 
-    public void Setup(Character target, ActionType actionType, Action<ActionType, Character> onClickCallback) {
+    public void Setup(BaseCharacter target, ActionType actionType, Action<ActionType, BaseCharacter> onClickCallback) {
         this.targetCharacter = target;
         this.actionType = actionType;
         this.onClickCallback = onClickCallback;
@@ -27,7 +27,8 @@ public class CharacterTargetButton : MonoBehaviour {
         if (characterImage != null && target != null && target.Stats != null && target.Stats.characterSprite != null) {
             characterImage.sprite = target.Stats.characterSprite;
             characterImage.color = Color.white;
-        };
+        }
+        ;
 
         if (button != null) {
             button.onClick.RemoveAllListeners();

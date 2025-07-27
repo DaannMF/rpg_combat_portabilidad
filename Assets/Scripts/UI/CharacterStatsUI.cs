@@ -7,7 +7,7 @@ public class CharacterStatsUI : MonoBehaviour {
     [SerializeField] private Transform characterStatsContainer;
     [SerializeField] private GameObject characterStatsPrefab;
 
-    private Dictionary<Character, CharacterStatsDisplay> characterDisplays = new Dictionary<Character, CharacterStatsDisplay>();
+    private Dictionary<BaseCharacter, CharacterStatsDisplay> characterDisplays = new Dictionary<BaseCharacter, CharacterStatsDisplay>();
     private GameManager gameManager;
     private TurnManager turnManager;
 
@@ -46,7 +46,7 @@ public class CharacterStatsUI : MonoBehaviour {
         Assert.IsNotNull(characterStatsPrefab, "CharacterStatsPrefab is not assigned in CharacterStatsUI");
         Assert.IsNotNull(gameManager, "GameManager is not found in CharacterStatsUI");
 
-        var allCharacters = new List<Character>();
+        var allCharacters = new List<BaseCharacter>();
         allCharacters.AddRange(gameManager.GetAllPlayers());
         allCharacters.AddRange(gameManager.GetAllEnemies());
 
@@ -54,7 +54,7 @@ public class CharacterStatsUI : MonoBehaviour {
             CreateCharacterDisplay(character);
     }
 
-    private void CreateCharacterDisplay(Character character) {
+    private void CreateCharacterDisplay(BaseCharacter character) {
         if (character == null) return;
 
         GameObject displayObject = Instantiate(characterStatsPrefab, characterStatsContainer);
@@ -69,14 +69,14 @@ public class CharacterStatsUI : MonoBehaviour {
         character.OnCharacterDeath += OnCharacterDeath;
     }
 
-    private void OnTurnStart(Character character) {
+    private void OnTurnStart(BaseCharacter character) {
         ClearActiveIndicators();
 
         if (characterDisplays.ContainsKey(character))
             characterDisplays[character].SetActiveIndicator(true);
     }
 
-    private void OnTurnEnd(Character character) {
+    private void OnTurnEnd(BaseCharacter character) {
         if (characterDisplays.ContainsKey(character))
             characterDisplays[character].SetActiveIndicator(false);
     }
@@ -86,12 +86,12 @@ public class CharacterStatsUI : MonoBehaviour {
             display.SetActiveIndicator(false);
     }
 
-    private void OnCharacterHealthChanged(Character character, int newHealth) {
+    private void OnCharacterHealthChanged(BaseCharacter character, int newHealth) {
         if (characterDisplays.ContainsKey(character))
             characterDisplays[character].UpdateHealth(newHealth);
     }
 
-    private void OnCharacterDeath(Character character) {
+    private void OnCharacterDeath(BaseCharacter character) {
         if (characterDisplays.ContainsKey(character))
             characterDisplays[character].UpdateDeathStatus(true);
     }

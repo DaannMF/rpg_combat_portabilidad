@@ -5,7 +5,7 @@ public class PlayerAction {
     public ActionType actionType;
     public string displayName;
     public bool isAvailable;
-    public Character target;
+    public BaseCharacter target;
     public int requiredDistance;
     public bool requiresTarget;
 
@@ -18,7 +18,7 @@ public class PlayerAction {
         this.requiresTarget = requiresTarget;
     }
 
-    public PlayerAction(ActionType type, Character target, int requiredDistance = 0) {
+    public PlayerAction(ActionType type, BaseCharacter target, int requiredDistance = 0) {
         actionType = type;
         displayName = type.GetDisplayName();
         isAvailable = true;

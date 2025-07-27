@@ -5,7 +5,7 @@ using System.Linq;
 public class PlayerActionController {
     private IPlayerAbilitySystem abilitySystem;
     private MovementSystem movementSystem;
-    private List<Character> allCharacters;
+    private List<BaseCharacter> allCharacters;
 
     public event Action<List<PlayerAction>> OnActionsUpdated;
     public event Action<List<ActionGroup>> OnActionGroupsUpdated;
@@ -17,11 +17,11 @@ public class PlayerActionController {
         this.movementSystem = movementSystem;
     }
 
-    public void Initialize(List<Character> allCharacters) {
+    public void Initialize(List<BaseCharacter> allCharacters) {
         this.allCharacters = allCharacters;
     }
 
-    public void StartPlayerTurn(Character player) {
+    public void StartPlayerTurn(BaseCharacter player) {
         if (!player.CharacterType.IsPlayer()) return;
 
         movementSystem.StartCharacterTurn(player);
@@ -29,7 +29,7 @@ public class PlayerActionController {
         RefreshAvailableActions(player);
     }
 
-    public void RefreshAvailableActions(Character player) {
+    public void RefreshAvailableActions(BaseCharacter player) {
         if (!player.CharacterType.IsPlayer()) return;
 
         var availableActions = abilitySystem.GetAvailableActions(player, allCharacters);
@@ -68,7 +68,7 @@ public class PlayerActionController {
         return groups.Values.ToList();
     }
 
-    public bool TryExecuteAction(Character player, PlayerAction action) {
+    public bool TryExecuteAction(BaseCharacter player, PlayerAction action) {
         if (!player.CharacterType.IsPlayer()) return false;
 
         if (abilitySystem.ExecuteAction(player, action)) {
@@ -91,17 +91,29 @@ public class PlayerActionController {
         return false;
     }
 
-    public bool TryExecuteActionOnTarget(Character player, ActionType actionType, Character target) {
+    public bool TryExecuteActionOnTarget(BaseCharacter player, ActionType actionType, BaseCharacter target) {
         if (!player.CharacterType.IsPlayer()) return false;
 
         var action = new PlayerAction(actionType, target);
         return TryExecuteAction(player, action);
     }
 
-    public bool TryMovePlayer(Character player, GridCell targetPosition) {
+    public bool TryMovePlayer(BaseCharacter player, GridCell targetPosition) {
         if (!player.CharacterType.IsPlayer()) return false;
 
         if (movementSystem.MoveCharacter(player, targetPosition)) {
+            OnMovementUpdated?.Invoke(movementSystem.GetRemainingMovement(player));
+            RefreshAvailableActions(player);
+            return true;
+        }
+
+        return false;
+    }
+
+    public bool TryMovePlayerToPosition(BaseCharacter player, GridCell targetPosition) {
+        if (!player.CharacterType.IsPlayer()) return false;
+
+        if (movementSystem.MoveCharacterToPosition(player, targetPosition)) {
             OnMovementUpdated?.Invoke(movementSystem.GetRemainingMovement(player));
             RefreshAvailableActions(player);
             return true;
