@@ -312,15 +312,8 @@ public class GameManager : MonoBehaviour {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
-    private void QuitAndroid() {
-        AndroidJavaObject activity = new AndroidJavaClass("com.unity3d.player.UnityPlayer").GetStatic<AndroidJavaObject>("currentActivity");
-        activity.Call<bool>("moveTaskToBack", true);
-    }
-
     public void QuitGame() {
-#if UNITY_ANDROID
-        QuitAndroid();
-#elif UNITY_STANDALONE
+#if UNITY_ANDROID || UNITY_STANDALONE
         Application.Quit();
 #elif UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;

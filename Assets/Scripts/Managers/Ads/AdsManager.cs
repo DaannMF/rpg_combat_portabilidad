@@ -34,11 +34,9 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener {
     }
 
     public void OnInitializationComplete() {
-        UnityMainThreadDispatcher.Enqueue(() => {
-            InterstitialManager.Instance?.Initialize();
-            BannersManager.Instance?.Initialize();
-            Debug.Log("Unity Ads Initialization Complete");
-        });
+        InterstitialManager.Instance?.Initialize();
+        BannersManager.Instance?.Initialize();
+        Debug.Log("Unity Ads Initialization Complete");
     }
 
     public void OnInitializationFailed(UnityAdsInitializationError error, string message) {
