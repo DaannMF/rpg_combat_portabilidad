@@ -2,78 +2,86 @@
 
 ## Resumen
 
-Este documento describe la arquitectura del Sistema de Combate RPG, enfocándose en la implementación de los principios SOLID y los patrones de diseño utilizados para crear un sistema mantenible, extensible y robusto.
+Este documento describe cómo está armado el Sistema de Combate RPG. Me enfoqué en crear un código fácil de mantener y que se pueda expandir sin problemas.
 
 ## Sistemas Principales
 
 ### 1. Sistema de Gestión del Juego (GameManager)
 
-**Responsabilidad**: Coordinación central del estado del juego y gestión de sistemas
+**Qué hace**: Se encarga de coordinar todo el estado del juego y manejar los sistemas
 
-**Características SOLID**:
-
-- **SRP**: Solo gestiona el estado general del juego y la coordinación de sistemas
-- **OCP**: Extensible para nuevos tipos de juego sin modificar código existente
-- **DIP**: Depende de abstracciones (Character) en lugar de implementaciones concretas
+- **Responsabilidad única**: Solo se encarga del estado general del juego
+- **Se puede extender**: Puedo agregar nuevos tipos de juego sin tocar el código existente
 
 ### 2. Sistema de Turnos (TurnManager)
 
-**Responsabilidad**: Control del flujo de turnos y transiciones
+**Qué hace**: Controla el flujo de turnos y las transiciones
 
-**Características SOLID**:
-
-- **SRP**: Solo maneja la lógica de turnos
-- **LSP**: Trata a Player y Enemy de manera uniforme como Character
-- **ISP**: Expone solo los eventos necesarios para cada sistema
+- **Responsabilidad única**: Solo maneja la lógica de turnos
+- Trata a Player y Enemy de la misma manera como Character
 
 ### 3. Sistema de Personajes (Character, Player, Enemy)
 
-**Responsabilidad**: Comportamiento y estado de los personajes
+**Qué hace**: Maneja el comportamiento y estado de los personajes
 
-**Características SOLID**:
-
-- **SRP**: Character maneja solo estado y comportamiento base
-- **OCP**: Fácil agregar nuevos tipos heredando de Character
-- **LSP**: Player y Enemy son intercambiables donde se espera Character
-- **DIP**: Usa BaseCharacterStats como abstracción de datos
+- **Responsabilidad única**: Character maneja solo estado y comportamiento base
+- **Se puede extender**: Es fácil agregar nuevos tipos heredando de Character
+- Player y Enemy son intercambiables donde se necesita Character
 
 ### 4. Sistema de Grilla (GridSystem)
 
-**Responsabilidad**: Gestión del campo de batalla y posicionamiento
+**Qué hace**: Gestiona el campo de batalla y posicionamiento
 
-**Características SOLID**:
-
-- **SRP**: Solo maneja lógica de grilla y posicionamiento
-- **OCP**: Extensible para diferentes tamaños de grilla
-- **DIP**: No depende de implementaciones específicas de Character
+- **Responsabilidad única**: Solo maneja lógica de grilla y posicionamiento
+- **Se puede extender**: Puedo cambiar el tamaño de grilla fácilmente
 
 ### 5. Sistema de Interfaz de Usuario
 
-**Responsabilidad**: Presentación visual y interacción del usuario
+**Qué hace**: Presentación visual e interacción del usuario
 
-**Características SOLID**:
+- **Responsabilidad única**: Cada componente UI tiene una función específica
+- **Se puede extender**: Fácil agregar nuevos tipos de UI sin modificar existentes
 
-- **SRP**: Cada componente UI tiene una responsabilidad específica
-- **OCP**: Fácil agregar nuevos tipos de UI sin modificar existentes
-- **ISP**: Interfaces especializadas para diferentes tipos de interacción
+### 6. Sistema de Gestión de Ads (AdsManager)
 
-## Implementación de Principios SOLID
+**Qué hace**: Se encarga de gestionar creación de la publicidad, en este caso dos tipos implementados Banners y Interstitial
 
-### Principio de Responsabilidad Única (SRP)
+**Por qué está bien hecho**:
 
-**Implementación**:
+- **Responsabilidad única**: Sólo maneja la lógica de creación de propagandas.
+- **Se puede extender**: Fácil agregar nuevos tipos de ads sin modificar existentes
+
+### 7. Sistema de notificaciones (NotificationsManager)
+
+**Qué hace**: Se encarga de realizar las configuraciones necesarias para que el juego envíe una notificación push al cabo de 10 minutos.
+
+- **Responsabilidad única**: Sólo maneja la lógica de implementación de notificaciones.
+
+### 7. Sistema de inputs (InputManager)
+
+**Qué hace**: Se encarga de detectar que tipo de input se está utilizando y ejecutar su lógica correspondiente.
+
+- **Responsabilidad única**: Sólo maneja la lógica de detección y ejecución del tipo de input.
+- **Se puede extender**: Fácil agregar nuevos tipos de inputs sin modificar existentes.
+
+## Principios que Seguí
+
+### Responsabilidad Única
+
+**Cómo lo apliqué**:
 
 - `GameManager`: Solo gestiona estado del juego y coordinación
 - `TurnManager`: Solo controla flujo de turnos
 - `GridSystem`: Solo maneja lógica de grilla
 - `PlayerActionController`: Solo coordina acciones de jugadores
 - `MovementSystem`: Solo gestiona movimiento de personajes
+- `AdsManager`: Solo gestiona la lógica de los ADS
+- `NotificationManager`: Solo gestiona la lógica de las notificaciones
+- `InputManager`: Solo gestiona la lógica de detección y ejecución del input.
 
-**Beneficio**: Cada clase es fácil de entender, probar y mantener.
+### Abierto/Cerrado
 
-### Principio Abierto/Cerrado (OCP)
-
-**Implementación**:
+**Cómo lo apliqué**:
 
 ```csharp
 // Clase base abstracta permite extensión sin modificación
@@ -87,64 +95,11 @@ public class Player : Character { /* implementación */ }
 public class Enemy : Character { /* implementación */ }
 ```
 
-**Beneficio**: Sistema extensible para nuevos tipos de personajes.
+## Patrones que Usé
 
-### Principio de Sustitución de Liskov (LSP)
+### 1. Patrón Observer (Basado en Eventos)
 
-**Implementación**:
-
-```csharp
-// TurnManager trata a todos los Character de manera uniforme
-public void Initialize(List<Character> characters)
-{
-    // Player y Enemy son intercambiables aquí
-    allCharacters = characters.ToList();
-}
-```
-
-**Beneficio**: Código genérico que funciona con cualquier tipo de Character.
-
-### Principio de Segregación de Interfaces (ISP)
-
-**Implementación**:
-
-```csharp
-// Interfaces específicas en lugar de una interfaz monolítica
-public interface IPlayerAbilitySystem
-{
-    List<PlayerAction> GetAvailableActions(Character character);
-    bool CanPerformAction(Character character, PlayerAction action);
-    bool ExecuteAction(Character character, PlayerAction action);
-}
-```
-
-**Beneficio**: Clases solo dependen de métodos que realmente usan.
-
-### Principio de Inversión de Dependencias (DIP)
-
-**Implementación**:
-
-```csharp
-// Depende de abstracción (BaseCharacterStats) no implementación
-public class Character : MonoBehaviour
-{
-    protected BaseCharacterStats stats; // Abstracción
-}
-
-// Sistema de alto nivel depende de interfaz
-public class PlayerActionController
-{
-    private readonly IPlayerAbilitySystem abilitySystem; // Abstracción
-}
-```
-
-**Beneficio**: Bajo acoplamiento y alta flexibilidad.
-
-## Patrones de Diseño Implementados
-
-### 1. Patrón Observer (Event-Driven)
-
-**Uso**: Comunicación entre sistemas
+**Para qué lo uso**: Comunicación entre sistemas
 
 ```csharp
 public event Action<Character> OnCharacterDeath;
@@ -152,39 +107,9 @@ public event Action<Character> OnTurnStart;
 public event Action<Character> OnGameWon;
 ```
 
-**Beneficio**: Bajo acoplamiento entre sistemas.
+### 2. Patrón Command (Implícito)
 
-### 2. Patrón Strategy
-
-**Uso**: Diferentes comportamientos de ExecuteTurn()
-
-```csharp
-// Player usa estrategia de entrada de usuario
-public override void ExecuteTurn() { /* input handling */ }
-
-// Enemy usa estrategia de IA
-public override void ExecuteTurn() { /* AI logic */ }
-```
-
-**Beneficio**: Algoritmos intercambiables sin modificar cliente.
-
-### 3. Patrón Factory
-
-**Uso**: Creación de estadísticas de personajes
-
-```csharp
-public static class CharacterStatsConfigurator
-{
-    public static BaseCharacterStats CreatePlayer1Stats() { /* ... */ }
-    public static BaseCharacterStats CreateEnemyStats() { /* ... */ }
-}
-```
-
-**Beneficio**: Creación centralizada y configurable de objetos.
-
-### 4. Patrón Command (Implícito)
-
-**Uso**: Acciones de personajes encapsuladas
+**Para qué lo uso**: Acciones de personajes encapsuladas
 
 ```csharp
 public class PlayerAction
@@ -195,42 +120,32 @@ public class PlayerAction
 }
 ```
 
-**Beneficio**: Acciones como objetos de primera clase.
+## Cómo Funcionan los Eventos
 
-## Arquitectura de Eventos
-
-### Flujo de Eventos Principal
+### Flujo Principal
 
 1. **Inicio de Turno**: `TurnManager.OnTurnStart` → UI actualiza jugador actual
 2. **Cambio de Salud**: `Character.OnHealthChanged` → UI actualiza estadísticas
 3. **Muerte de Personaje**: `Character.OnCharacterDeath` → GameManager verifica condiciones
 4. **Fin de Juego**: `GameManager.OnGameWon/OnGameLost` → UI muestra resultado
 
-### Beneficios de la Arquitectura de Eventos
+### Por Qué Uso Eventos
 
-- **Desacoplamiento**: Sistemas no necesitan referencias directas
+- **Desacoplamiento**: Los sistemas no necesitan referencias directas
 - **Extensibilidad**: Fácil agregar nuevos observadores
 - **Mantenibilidad**: Cambios localizados sin afectar otros sistemas
 
-## Consideraciones de Rendimiento
-
-### Optimizaciones Implementadas
-
-1. **Lookups O(1)**: Dictionary-based para posiciones de grilla
-2. **Eventos Eficientes**: Solo se actualiza UI cuando es necesario
-3. **Structs para Valores**: GridCell usa struct para mejor localidad de memoria
-4. **ScriptableObjects Compartidos**: Stats no se duplican en memoria
-
-### Escalabilidad
+### Para Escalabilidad
 
 - Sistema preparado para grillas más grandes
 - Arquitectura soporta más tipos de personajes
 - UI dinámica escala con número de acciones
 
-## Beneficios de la Arquitectura
+## Beneficios del Sistema
 
 1. **Mantenibilidad**: Código limpio y bien organizado
 2. **Extensibilidad**: Fácil agregar nuevas características
-3. **Testabilidad**: Componentes aislados y mockeable
+3. **Testabilidad**: Componentes aislados y fáciles de probar
 4. **Reutilización**: Sistemas genéricos reutilizables
 5. **Rendimiento**: Optimizaciones sin comprometer claridad
+6. **Multiplataforma**: Funciona tanto en móviles como en escritorio

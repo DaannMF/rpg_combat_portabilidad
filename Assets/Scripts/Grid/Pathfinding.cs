@@ -54,7 +54,6 @@ public static class Pathfinding {
                     if (newDistance > maxDistance)
                         continue;
 
-
                     distances[neighbor] = newDistance;
                     cameFrom[neighbor] = current;
                     queue.Enqueue(neighbor);
