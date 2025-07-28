@@ -23,6 +23,9 @@ public class GridSystem : MonoBehaviour {
     private float calculatedCellWidth;
     private float calculatedCellHeight;
 
+    public int Width => width;
+    public int Height => height;
+
     private void Awake() {
         InitializeGrid();
     }
@@ -178,7 +181,6 @@ public class GridSystem : MonoBehaviour {
                 GridCell targetCell = GetGridCell(x, y);
                 if (targetCell == null || targetCell.Equals(fromCell)) continue;
 
-                // Calcular el costo real de movimiento (considerando que solo se permiten movimientos ortogonales)
                 int dx = Mathf.Abs(targetCell.x - fromCell.x);
                 int dy = Mathf.Abs(targetCell.y - fromCell.y);
                 int realMovementCost = Mathf.Max(dx, dy) + Mathf.Min(dx, dy);

@@ -9,6 +9,17 @@ public class BannersManager : MonoBehaviour {
 
     private string _unityId = null;
 
+    private static BannersManager _instance;
+    public static BannersManager Instance {
+        get {
+            if (_instance == null) {
+                _instance = FindFirstObjectByType<BannersManager>();
+            }
+            return _instance;
+        }
+    }
+
+
     void Start() {
 #if UNITY_ANDROID
         _unityId = _androidUnityId;
@@ -17,14 +28,19 @@ public class BannersManager : MonoBehaviour {
 #endif
     }
 
-    internal void Initialize() {
+
+
+    public void Initialize() {
         BannerLoadOptions bannerLoadOptions = new() {
             loadCallback = OnBannerLoaded,
             errorCallback = OnBannerError
         };
 
         Advertisement.Banner.SetPosition(BannerPosition.BOTTOM_RIGHT);
+
         Advertisement.Banner.Load(_unityId, bannerLoadOptions);
+
+        Debug.Log("Unityt Ads - Banner ad initialized");
     }
 
     private void OnBannerLoaded() {

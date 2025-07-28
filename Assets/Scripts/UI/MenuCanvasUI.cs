@@ -32,7 +32,6 @@ public class MenuCanvasUI : MonoBehaviour {
         mainMenuPanel.SetActive(false);
         gameOverPanel.gameObject.SetActive(true);
 
-        // Set the title and message in the game over panel
         string winnerName = winner != null ? winner.Stats.characterName : UNKNOWN_PLAYER;
         if (isVictory)
             gameOverPanel.SetTileAndMessage(VICTORY_TITLE, $"{winnerName} wins!");

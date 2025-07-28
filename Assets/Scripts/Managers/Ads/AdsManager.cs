@@ -13,9 +13,6 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener {
 #pragma warning disable 0414
     private string gameId;
     private bool testMode = true;
-
-    private BannersManager bannerManager;
-    private InterstitialManager interstitialManager;
 #pragma warning restore 0414
 
     void Awake() {
@@ -33,18 +30,15 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener {
 #if UNITY_ANDROID || UNITY_IOS
         if (!Advertisement.isInitialized && Advertisement.isSupported)
             Advertisement.Initialize(gameId, testMode, this);
-
-        bannerManager = FindFirstObjectByType<BannersManager>();
-        interstitialManager = FindFirstObjectByType<InterstitialManager>();
 #endif
     }
 
     public void OnInitializationComplete() {
-        Debug.Log("Unity Ads Initialization Complete");
-
-        // Initialize the banners and interstitials.
-        if (bannerManager != null) bannerManager.Initialize();
-        if (interstitialManager != null) interstitialManager.Initialize();
+        UnityMainThreadDispatcher.Enqueue(() => {
+            InterstitialManager.Instance?.Initialize();
+            BannersManager.Instance?.Initialize();
+            Debug.Log("Unity Ads Initialization Complete");
+        });
     }
 
     public void OnInitializationFailed(UnityAdsInitializationError error, string message) {

@@ -92,7 +92,6 @@ public class TurnManager : MonoBehaviour {
             if (actionController != null)
                 actionController.StartPlayerTurn(player);
 
-            // Configurar el input manager para el jugador actual
             if (inputManager != null)
                 inputManager.SetActivePlayer(player);
 
@@ -113,9 +112,6 @@ public class TurnManager : MonoBehaviour {
         isProcessingTurn = false;
 
         if (finishedCharacter is Player player) {
-            player.SetAsCurrentPlayer(false);
-
-            // Terminar el turno en el input manager
             if (inputManager != null)
                 inputManager.EndPlayerTurn();
         }
@@ -176,9 +172,5 @@ public class TurnManager : MonoBehaviour {
         CurrentCharacter = null;
 
         CancelInvoke(nameof(StartNextTurn));
-
-        foreach (var character in allCharacters)
-            if (character is Player player)
-                player.SetAsCurrentPlayer(false);
     }
 }

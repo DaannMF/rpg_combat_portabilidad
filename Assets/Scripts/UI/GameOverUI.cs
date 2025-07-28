@@ -7,6 +7,7 @@ public class GameOverUI : MonoBehaviour {
     [SerializeField] private TMP_Text titleText;
     [SerializeField] private TMP_Text messageText;
     [SerializeField] private Button restartButton;
+    [SerializeField] private Button quitButton;
 
     private GameManager gameManager;
 
@@ -16,6 +17,11 @@ public class GameOverUI : MonoBehaviour {
         if (restartButton != null)
             restartButton.onClick.AddListener(RestartGame);
 
+        if (quitButton != null) {
+            quitButton.onClick.AddListener(() => {
+                UIEvents.OnGameQuit?.Invoke();
+            });
+        }
     }
 
     public void SetTileAndMessage(string title, string message) {

@@ -19,7 +19,6 @@ public class MovementSystem {
         if (remainingMovement[character] <= 0) return false;
         if (character.IsDead) return false;
 
-        // Usar Manhattan distance para permitir solo movimientos ortogonales (no diagonales)
         int distance = character.CurrentPosition.GetManhattanDistance(targetPosition);
         if (distance != 1) return false;
 
@@ -32,10 +31,8 @@ public class MovementSystem {
         if (character.IsDead) return false;
         if (targetPosition == null) return false;
 
-        // Verificar que la posición destino no esté ocupada
         if (gridSystem.IsPositionOccupied(targetPosition)) return false;
 
-        // Usar el sistema de pathfinding para verificar si hay un camino válido
         return Pathfinding.HasValidPath(gridSystem, character.CurrentPosition, targetPosition, remainingMovement[character]);
     }
 
@@ -53,17 +50,14 @@ public class MovementSystem {
     public bool MoveCharacterToPosition(BaseCharacter character, GridCell targetPosition) {
         if (!CanMoveToPosition(character, targetPosition)) return false;
 
-        // Encontrar el camino usando pathfinding
         List<GridCell> path = Pathfinding.FindPath(gridSystem, character.CurrentPosition, targetPosition, remainingMovement[character]);
 
         if (path == null || path.Count == 0) return false;
 
-        // Mover el personaje al destino final
         gridSystem.SetCharacterPosition(character, targetPosition);
         character.SetPosition(targetPosition);
         character.transform.position = gridSystem.GetCharacterWorldPosition(targetPosition);
 
-        // Consumir la cantidad de movimiento necesaria (longitud del camino)
         int movementCost = path.Count;
         remainingMovement[character] = Mathf.Max(0, remainingMovement[character] - movementCost);
 

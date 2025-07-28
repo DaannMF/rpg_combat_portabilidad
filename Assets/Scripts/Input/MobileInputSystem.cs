@@ -45,6 +45,10 @@ public class MobileInputSystem : BaseInputSystem {
         }
     }
 
+    public void EnableMobileInput(bool enable) {
+        enableMobileInput = enable;
+    }
+
     public void Cleanup() {
         GridCell.OnCellClicked -= HandleCellClick;
     }

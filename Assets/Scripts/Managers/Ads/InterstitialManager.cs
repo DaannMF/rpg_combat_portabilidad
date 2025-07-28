@@ -11,6 +11,16 @@ public class InterstitialManager : MonoBehaviour, IUnityAdsLoadListener, IUnityA
     private string _unityId = null;
     private bool isLoaded;
 
+    private static InterstitialManager _instance;
+    public static InterstitialManager Instance {
+        get {
+            if (_instance == null) {
+                _instance = FindFirstObjectByType<InterstitialManager>();
+            }
+            return _instance;
+        }
+    }
+
     void Start() {
 #if UNITY_ANDROID
         _unityId = _androidUnityId;
@@ -19,24 +29,14 @@ public class InterstitialManager : MonoBehaviour, IUnityAdsLoadListener, IUnityA
 #endif
     }
 
-    private BannersManager bannersManager;
-    private GameManager gameManager;
-
-    private void Awake() {
-        bannersManager = FindFirstObjectByType<BannersManager>();
-        gameManager = FindFirstObjectByType<GameManager>();
-
-        if (gameManager != null)
-            gameManager.OnInterstitialAdRequested += ShowInterstitialAd;
-    }
-
     internal void Initialize() {
         Advertisement.Load(_unityId, this);
+        Debug.Log("Unity Ads - Interstitial ad initialized");
     }
 
     public void ShowInterstitialAd() {
         if (isLoaded) {
-            if (bannersManager != null) bannersManager.HideBannerAd();
+            BannersManager.Instance?.HideBannerAd();
             Advertisement.Show(_unityId, this);
             isLoaded = false;
         }
@@ -66,7 +66,7 @@ public class InterstitialManager : MonoBehaviour, IUnityAdsLoadListener, IUnityA
     }
 
     public void OnUnityAdsShowComplete(string placementId, UnityAdsShowCompletionState showCompletionState) {
-        if (bannersManager != null) bannersManager.ShowBannerAd();
+        BannersManager.Instance?.ShowBannerAd();
         Initialize();
     }
 }

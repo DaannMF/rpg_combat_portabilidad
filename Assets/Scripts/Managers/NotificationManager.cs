@@ -65,6 +65,7 @@ public class NotificationsManager : MonoBehaviour {
 
         // Schedule the notification
         AndroidNotificationCenter.SendNotification(notification10Minutes, CHANNEL_ID);
+        Debug.Log("Notification scheduled for 10 minutes from now.");
     }
 #endif
 }

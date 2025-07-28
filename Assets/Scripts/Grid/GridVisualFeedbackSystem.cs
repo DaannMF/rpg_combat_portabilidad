@@ -30,7 +30,6 @@ public class GridVisualFeedbackSystem {
             highlightedCells.Add(cell);
         }
 
-        // También mostrar celdas inválidas en el rango pero ocupadas
         HighlightInvalidCells(character);
     }
 
@@ -44,7 +43,6 @@ public class GridVisualFeedbackSystem {
                 GridCell cell = gridSystem.GetGridCell(x, y);
                 if (cell == null || cell.Equals(character.CurrentPosition)) continue;
 
-                // Si la celda está ocupada, mostrarla como inválida
                 if (gridSystem.IsPositionOccupied(cell)) {
                     int distance = character.CurrentPosition.GetChebyshevDistance(cell);
                     if (distance <= maxDistance) {
@@ -64,11 +62,9 @@ public class GridVisualFeedbackSystem {
     }
 
     public void ClearAllHighlights() {
-        foreach (GridCell cell in highlightedCells) {
-            if (cell != null) {
-                cell.ResetToDefault();
-            }
-        }
+        foreach (GridCell cell in highlightedCells)
+            if (cell != null) cell.ResetToDefault();
+
         highlightedCells.Clear();
     }
 
@@ -78,20 +74,10 @@ public class GridVisualFeedbackSystem {
         return movementSystem.CanMoveToPosition(currentActiveCharacter, targetCell);
     }
 
-    public int GetMovementCostForCurrentCharacter(GridCell targetCell) {
-        if (currentActiveCharacter == null || targetCell == null) return -1;
-
-        return movementSystem.GetMovementCost(currentActiveCharacter, targetCell);
-    }
-
     public void UpdateAfterMovement() {
         if (currentActiveCharacter != null) {
             SetActiveCharacter(currentActiveCharacter);
         }
-    }
-
-    public BaseCharacter GetActiveCharacter() {
-        return currentActiveCharacter;
     }
 
     public void EndTurn() {

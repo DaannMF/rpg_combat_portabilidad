@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public class InputManager : MonoBehaviour {
@@ -45,5 +44,7 @@ public class InputManager : MonoBehaviour {
 
     public void EnableInput(bool enable) {
         enableInput = enable;
+        if (currentInputSystem is MobileInputSystem mobileSystem)
+            mobileSystem.EnableMobileInput(enable);
     }
 }

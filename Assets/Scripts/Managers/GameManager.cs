@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour {
     [Header("Game Settings")]
@@ -26,7 +27,6 @@ public class GameManager : MonoBehaviour {
     [SerializeField] private InputManager inputManager;
 
     public event Action OnCharactersSpawned;
-    public event Action OnInterstitialAdRequested;
 
     private GameState currentGameState = GameState.NotStarted;
     private List<BaseCharacter> allCharacters = new List<BaseCharacter>();
@@ -38,6 +38,7 @@ public class GameManager : MonoBehaviour {
     private PlayerAbilitySystem abilitySystem;
 
     public GameState CurrentGameState => currentGameState;
+
     void Awake() {
         UIEvents.OnGamePaused += OnGamePaused;
         UIEvents.OnGameResumed += OnGameResumed;
@@ -169,9 +170,6 @@ public class GameManager : MonoBehaviour {
         SetupCharacter(player, type, position, stats, sprite);
         players.Add(player);
 
-        if (actionController != null)
-            player.SetActionController(actionController);
-
         player.OnCharacterDeath += OnPlayerDeath;
     }
 
@@ -250,19 +248,17 @@ public class GameManager : MonoBehaviour {
         }
     }
 
-    private void OnGamePaused() {
+    public void OnGamePaused() {
         if (currentGameState != GameState.Playing) return;
 
-        StopAllSystems();
-
-        if (menuCanvas != null)
+        if (menuCanvas != null) {
+            menuCanvas.gameObject.SetActive(true);
             menuCanvas.ShowMainMenu();
+        }
     }
 
     private void OnGameResumed() {
         if (currentGameState != GameState.Playing) return;
-
-        ReactivateAllSystems();
 
         if (menuCanvas != null)
             menuCanvas.Hide();
@@ -275,11 +271,13 @@ public class GameManager : MonoBehaviour {
 
         StopAllSystems();
 
-        OnInterstitialAdRequested?.Invoke();
+        InterstitialManager.Instance?.ShowInterstitialAd();
 
         bool isVictory = victory && winner != null;
-        if (menuCanvas != null)
+        if (menuCanvas != null) {
+            menuCanvas.gameObject.SetActive(true);
             menuCanvas.ShowGameOverPanel(isVictory, winner);
+        }
     }
 
     private void StopAllSystems() {
@@ -311,36 +309,21 @@ public class GameManager : MonoBehaviour {
     }
 
     public void RestartGame() {
-        if (menuCanvas != null)
-            menuCanvas.Hide();
-
-        currentGameState = GameState.NotStarted;
-
-        foreach (var character in allCharacters)
-            if (character != null)
-                Destroy(character.gameObject);
-
-        allCharacters.Clear();
-        players.Clear();
-        enemies.Clear();
-
-        ReactivateAllSystems();
-        InitializeGame();
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
-    private void ReactivateAllSystems() {
-        if (turnManager != null) {
-            turnManager.gameObject.SetActive(true);
-            turnManager.ResetGame();
-        }
+    private void QuitAndroid() {
+        AndroidJavaObject activity = new AndroidJavaClass("com.unity3d.player.UnityPlayer").GetStatic<AndroidJavaObject>("currentActivity");
+        activity.Call<bool>("moveTaskToBack", true);
+    }
 
-        if (playerActionUI != null)
-            playerActionUI.gameObject.SetActive(true);
-
-        if (characterStatsUI != null)
-            characterStatsUI.gameObject.SetActive(true);
-
-        if (gridSystem != null)
-            gridSystem.gameObject.SetActive(true);
+    public void QuitGame() {
+#if UNITY_ANDROID
+        QuitAndroid();
+#elif UNITY_STANDALONE
+        Application.Quit();
+#elif UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#endif
     }
 }
