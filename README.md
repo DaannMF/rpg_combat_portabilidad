@@ -9,7 +9,7 @@ El sistema cuenta con tres clases de personajes distintas (Luchador, Sanador, Ar
 ## Información del Proyecto
 
 **Autor**: Daniel Fimiani  
-**Proyecto**: Segundo Parcial  
+**Proyecto**: Final
 **Materia**: Portabilidad y Optimización  
 **Institución**: Image Campus  
 
@@ -26,7 +26,14 @@ El sistema cuenta con tres clases de personajes distintas (Luchador, Sanador, Ar
 
 ### Movimiento
 
+#### Teclado
+
 - **WASD** o **Flechas**: Mover una celda en la dirección correspondiente
+- **Click**: Ejecutar acción(Atacar, sanar, terminar turno)
+
+#### Móviles
+
+- **Touch** o **Flechas**: Mover una celda en la dirección correspondiente y ejecutar acción(Atacar, sanar, terminar turno)
 
 ### Acciones
 
@@ -86,14 +93,8 @@ El proyecto incluye documentación detallada sobre la implementación de sistema
 
 ### Documentación Principal
 
-- **[Arquitectura General](Assets/Scripts/Documentation/ArquitecturaGeneral.md)**: Visión general del sistema y implementación de principios SOLID
-- **[Sistema de Gestión de Estado](Assets/Scripts/Documentation/SistemaEstadoJuego.md)**: Gestión de estados del juego y limpieza de sistemas
-- **[Sistema de Interfaz de Usuario](Assets/Scripts/Documentation/SistemaInterfazUsuario.md)**: UI basada en grillas y sistema de acciones dinámicas
-
-### Documentación Técnica
-
-- **[Sistema de Posicionamiento](Assets/Scripts/Documentation/SistemaGrid.md)**: Sistema de grilla y posicionamiento de personajes
-- **[Sistema de Estadísticas](Assets/Scripts/Documentation/SistemaEstadisticas.md)**: Visualización de estadísticas de personajes en tiempo real
+- **[Arquitectura General](Documentation/ArquitecturaGeneral.md)**: Visión general del sistema y implementación de principios SOLID
+- **[Arquitectura General](Documentation/AdaptacionMoviles.md)**: Cambios realizados para adaptar el juego a dispositivos móviles.
 
 ## Instalación y Configuración
 
@@ -118,6 +119,8 @@ El proyecto incluye documentación detallada sobre la implementación de sistema
 - **TurnManager**: Controla el flujo de juego por turnos
 - **GameManager**: Orquesta el estado general del juego
 - **UI System**: Muestra información del juego y maneja retroalimentación del usuario
+- **Ads Manager**: Controla la publicidad
+- **Notifications Manager**: Gestiona las notificaciones push
 
 ### Estructura del Proyecto
 
@@ -130,6 +133,7 @@ Assets/
 │   ├── Data/               # Scriptable Objects
 │   ├── Enums/              # Enumeraciones del sistema
 │   ├── Grid/               # Sistema de grilla
+│   ├── Input/              # Gestor de inputs
 │   ├── Interfaces/         # Interfaces del sistema
 │   ├── Managers/           # Gestores principales
 │   ├── Models/             # Modelos de datos
@@ -140,54 +144,3 @@ Assets/
 ├── Art/Sprites/           # Sprites de personajes y UI
 └── Scenes/                # Escenas del juego
 ```
-
-## Principios SOLID Implementados
-
-- **Responsabilidad Única**: Cada clase tiene un propósito específico
-- **Abierto/Cerrado**: Fácil de extender con nuevos tipos de personajes
-- **Sustitución de Liskov**: Player y Enemy son intercambiables como Characters
-- **Segregación de Interfaces**: Las clases solo exponen métodos necesarios
-- **Inversión de Dependencias**: Los módulos de alto nivel dependen de abstracciones
-
-## Patrones de Diseño Utilizados
-
-- **Patrón Observer**: Arquitectura basada en eventos para bajo acoplamiento
-- **Patrón Strategy**: Diferentes implementaciones de comportamiento de personajes
-- **Patrón Factory**: Creación y configuración de estadísticas de personajes
-- **Patrón Command**: Acciones de personajes encapsuladas
-
-## Futuras Mejoras
-
-### Características Planeadas
-
-- Animaciones y efectos visuales de personajes
-- Sistema de sonido con retroalimentación de audio
-- Funcionalidad de guardado/carga del juego
-- Múltiples niveles de dificultad
-- Editor de nivel para campos de batalla personalizados
-
-### Mejoras Técnicas
-
-- Procesamiento de IA enemiga asíncrona
-- Búsqueda de ruta A* para movimiento complejo
-- Sistema de habilidad más sofisticado
-- Soporte de juego en red
-
-## Contribuciones
-
-1. Forkear este repositorio
-2. Crear una rama de característica (`git checkout -b feature/amazing-feature`)
-3. Confirmar cambios (`git commit -m 'Add some amazing feature'`)
-4. Enviar a la rama (`git push origin feature/amazing-feature`)
-5. Abrir una Solicitud de Extracción
-
-## Licencia
-
-Este proyecto está licenciado bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
-
-## Agradecimientos
-
-- Construido usando Unity Engine
-- Sigue las mejores prácticas y convenciones de Unity
-- Implementa principios de arquitectura limpia
-- Diseñado para fines educativos y de portafolio
