@@ -94,7 +94,7 @@ El proyecto incluye documentación detallada sobre la implementación de sistema
 ### Documentación Principal
 
 - **[Arquitectura General](Documentation/ArquitecturaGeneral.md)**: Visión general del sistema y implementación de principios SOLID
-- **[Arquitectura General](Documentation/AdaptacionMoviles.md)**: Cambios realizados para adaptar el juego a dispositivos móviles.
+- **[Adaptación a móviles](Documentation/AdaptacionMoviles.md)**: Cambios realizados para adaptar el juego a dispositivos móviles.
 
 ## Instalación y Configuración
 
